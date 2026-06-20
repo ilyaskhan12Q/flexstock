@@ -1,0 +1,54 @@
+name: "Bug Report"
+description: File a bug report
+title: "[BUG]: "
+labels: ["type: bug", "status: needs-review"]
+body:
+  - type: markdown
+    attributes:
+      value: "Thanks for reporting! Please fill in all fields below."
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Bug Description
+      description: A clear description of what the bug is
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to Reproduce
+      placeholder: |
+        1. Go to '...'
+        2. Click on '...'
+        3. See error
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: FlexStock Version
+      placeholder: e.g. v1.0.2
+    validations:
+      required: true
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity
+      options:
+        - Critical (data loss / system crash)
+        - High (feature broken)
+        - Medium (degraded experience)
+        - Low (cosmetic / minor)
+    validations:
+      required: true

@@ -1,0 +1,36 @@
+name: "Feature Request"
+description: Suggest a new feature or improvement
+title: "[FEATURE]: "
+labels: ["type: feature", "status: needs-review"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem does this solve?
+      description: Describe the business need or user pain point
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed Solution
+      description: What would you like to happen?
+    validations:
+      required: true
+
+  - type: dropdown
+    id: module
+    attributes:
+      label: Relevant Module
+      options:
+        - Auth / Users
+        - Products / Categories
+        - Inventory
+        - Dashboard
+        - Reports
+        - Sales (optional module)
+        - Label Printing (optional module)
+        - Settings
+        - API / Backend
+        - Other

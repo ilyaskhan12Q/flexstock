@@ -1,0 +1,1238 @@
+# FlexStock  Generalized Inventory Management System
+## Product Requirements Document (PRD)
+**Version:** 1.0.0
+**Status:** Draft
+**Last Updated:** June 2026
+**Author:** Project Lead
+
+---
+
+## Table of Contents
+
+1. [Project Overview](#1-project-overview)
+2. [Goals & Non-Goals](#2-goals--non-goals)
+3. [Research Decisions](#3-research-decisions)
+4. [Tech Stack](#4-tech-stack)
+5. [System Architecture](#5-system-architecture)
+6. [Database Schema](#6-database-schema)
+7. [Feature Specifications](#7-feature-specifications)
+8. [Optional Module: Sales & Label Printing](#8-optional-module-sales--label-printing)
+9. [API Design](#9-api-design)
+10. [Real-Time Strategy](#10-real-time-strategy)
+11. [GitHub Repository Standards](#11-github-repository-standards)
+12. [Git Workflow & Branching](#12-git-workflow--branching)
+13. [CI/CD Pipeline](#13-cicd-pipeline)
+14. [Release Strategy](#14-release-strategy)
+15. [Testing Strategy](#15-testing-strategy)
+16. [Documentation Standards](#16-documentation-standards)
+17. [Build & Delivery Plan](#17-build--delivery-plan)
+18. [Phase-by-Phase Milestones](#18-phase-by-phase-milestones)
+
+---
+
+## 1. Project Overview
+
+**FlexStock** is a self-hostable, white-label inventory management system built as a single configurable codebase. It is sold or delivered to individual business clients who need to track their own products. Each client receives the full source code and deploys it on their own server.
+
+The system is **product-agnostic by design**  meaning the same codebase handles a pharmacy, a clothing store, a hardware shop, or a warehouse without any code changes. All customization happens through an admin panel where the owner defines their product categories and custom fields.
+
+### Who Is This For?
+
+| Role | Description |
+|---|---|
+| **Developer (You)** | Builds and maintains the codebase, delivers to clients |
+| **Business Owner** | Receives the system, configures it for their products, manages inventory |
+| **Staff/Employees** | Uses the system daily to record stock movements, view levels |
+
+---
+
+## 2. Goals & Non-Goals
+
+### Goals
+
+- One codebase, fully configurable per client via admin panel
+- Real-time stock updates across all open browser sessions
+- Dynamic product fields (no schema changes per client)
+- Role-based access control (admin, manager, staff)
+- Low-stock alerts and movement history
+- Clean, professional export (PDF/Excel reports)
+- Optional: barcode/price tag label printing
+- Optional: sales tracking per transaction
+- Professional GitHub repository with full documentation
+- Easy one-command installation for non-technical clients
+
+### Non-Goals
+
+- This is NOT a SaaS / multi-tenant hosted platform
+- No cloud billing, subscription management, or payment gateway (in core)
+- No mobile app (web is responsive enough)
+- No AI/ML demand forecasting (future roadmap)
+- No e-commerce storefront
+
+---
+
+## 3. Research Decisions
+
+Every major technical choice below is backed by research. Decisions are documented here so future developers understand **why**, not just **what**.
+
+---
+
+### 3.1 Real-Time Strategy: WebSockets via Socket.IO
+
+**The question:** For live stock updates when one user adds stock and another is viewing the dashboard  what technology to use?
+
+**Options evaluated:**
+
+| Option | Direction | Complexity | Self-host friendly |
+|---|---|---|---|
+| Polling (every 530s) | Client  Server | Very Low | Yes |
+| SSE (Server-Sent Events) | Server  Client | Low | Yes |
+| WebSockets (Socket.IO) | Bidirectional | Medium | Yes |
+
+**Research findings:**
+- SSE is HTTP-based, supports auto-reconnection, and is simpler than WebSockets for one-way streaming. It is an excellent middle ground for server-to-client updates like dashboards and live feeds.
+- WebSockets are the right tool when both sides need to talk with low latency. For inventory actions (add stock, adjust, remove), the client *does* send events that need to immediately reflect on *all* other clients.
+- Under HTTP/2 (which modern hosts support), SSE's old browser connection limit is removed.
+- Many production teams start with SSE and only migrate to WebSockets if needed.
+
+**Decision: Socket.IO (WebSockets with SSE/polling fallback)**
+
+Socket.IO automatically falls back to long polling when WebSockets are unavailable, handles reconnection, and is battle-tested for exactly this use case. It keeps the real-time stack in one library. Every stock movement event is broadcast to all connected clients in that session.
+
+---
+
+### 3.2 Dynamic Product Fields: Hybrid EAV + JSONB
+
+**The question:** How do we store product fields that differ completely per client (expiry dates for pharmacy, sizes for clothing, voltage for electronics)?
+
+**Options evaluated:**
+
+| Option | Flexibility | Query Speed | Complexity |
+|---|---|---|---|
+| Fixed columns | None | Fast | Low |
+| Pure EAV (rows as attributes) | High | Slow (JOIN-heavy) | Medium |
+| JSONB column (PostgreSQL) | High | Medium (indexable) | Low |
+| Hybrid: fixed core + JSONB custom | High | Fast | Low-Medium |
+
+**Research findings:**
+- The EAV model stores attributes as rows instead of columns. This eliminates the need for schema changes whenever a new attribute is introduced, and supports indexing for faster filtering.
+- However, EAV shifts effort into validation logic, query complexity, and application-side interpretation  it is a trade-off, not a free flexibility upgrade.
+- JSONB in PostgreSQL is simpler to query than pure EAV and supports GIN indexing for fast searches on dynamic fields.
+- A hybrid approach  fixed columns for core fields, JSONB for custom ones  gives the best balance.
+
+**Decision: Hybrid fixed + JSONB**
+
+Core fields (name, SKU, quantity, price, category) are fixed columns. All client-defined custom fields are stored as a JSONB `custom_fields` column on the product. The admin panel defines which custom fields exist per category; the frontend renders dynamic forms; the backend validates against the schema definition.
+
+---
+
+### 3.3 Label Printing Strategy: Browser Print API + QZ Tray (Optional)
+
+**The question:** How do we print price tags and barcodes from a web app to a thermal printer?
+
+**Options evaluated:**
+
+| Option | Setup | Works Offline | Thermal Support |
+|---|---|---|---|
+| Browser `window.print()` | None | Yes | WARNING: Limited |
+| PDF generation  print | Easy | Yes | Yes |
+| QZ Tray (local bridge) | Medium | Yes | Full ZPL |
+| Cloud print service | Hard | No | Yes |
+
+**Research findings:**
+- Browser-based printing via `window.print()` with a print-specific CSS layout works for regular inkjet/laser printers and produces clean labels.
+- QZ Tray is a free, open-source local bridge app that allows raw ZPL/ESC-P commands from a browser to thermal printers like Zebra, giving full professional thermal printing support.
+- For clients with basic printers, PDF-based label sheets (printable on A4/Letter with a label sheet layout) cover 80% of use cases without any extra software.
+- The Web Print SDK approach from some vendors requires proprietary drivers and is not generic enough.
+
+**Decision: Two-tier approach**
+
+- **Tier 1 (default):** CSS print layout + PDF label sheet generation using `pdfkit`. Works with any printer, zero configuration.
+- **Tier 2 (optional, config flag):** QZ Tray integration for clients with thermal label printers who need ZPL output. Enabled via `LABEL_PRINTER=thermal` in config.
+
+---
+
+### 3.4 Barcode Generation: `bwip-js` (server-side)
+
+**Decision:** Use `bwip-js` (Barcode Writer in Pure JavaScript) on the server to generate barcode images as PNGs on demand. It supports Code128, QR, EAN-13, and more. Zero external dependencies, fully self-hostable.
+
+---
+
+## 4. Tech Stack
+
+| Layer | Technology | Reason |
+|---|---|---|
+| **Frontend** | React 18 + Vite | Fast, component-driven, great ecosystem |
+| **UI Library** | shadcn/ui + Tailwind CSS | Professional out of the box, easily customizable |
+| **State Management** | Zustand | Lightweight, no boilerplate |
+| **Real-Time Client** | Socket.IO Client | Pairs with backend, handles reconnection |
+| **Backend** | Node.js + Express | JavaScript full-stack, broad hosting support |
+| **Real-Time Server** | Socket.IO | Battle-tested WebSocket library with fallbacks |
+| **Database** | PostgreSQL 15+ | JSONB support, reliable, free |
+| **ORM** | Prisma | Type-safe, migrations, great DX |
+| **Authentication** | JWT + bcrypt | Stateless, self-hostable |
+| **Barcode** | bwip-js | Zero-dependency barcode generation |
+| **PDF Export** | pdfkit | Server-side PDF, no browser needed |
+| **Excel Export** | exceljs | Full Excel file generation |
+| **Label Printing** | CSS print + optional QZ Tray | Flexible, works on any printer |
+| **Testing** | Vitest + Supertest + Playwright | Unit + API + E2E |
+| **Process Manager** | PM2 | Production Node.js process management |
+| **Dev Environment** | Docker Compose | Consistent local setup |
+
+---
+
+## 5. System Architecture
+
+```
+
+                        CLIENT BROWSER                       
+                                                             
+  React + Vite App                                           
+       
+     Dashboard     Products       Admin / Config     
+    (realtime)     (dynamic       (categories,       
+                    forms)         fields, users)    
+       
+                                                          
+  Socket.IO Client     REST API calls      REST API calls   
+
+                                             
+                                             
+
+                     NODE.JS / EXPRESS SERVER                
+                                                             
+        
+   Socket.IO       REST API        Auth Middleware    
+   Server          Routes          (JWT)             
+   (events)                                          
+        
+                                                           
+     
+                     BUSINESS LOGIC LAYER                 
+    ProductService | InventoryService | ReportService     
+     
+                                                            
+     
+                       PRISMA ORM                         
+     
+
+                                  
+                                  
+                    
+                          POSTGRESQL DB       
+                                             
+                      users, categories,     
+                      product_fields,        
+                      products (+ JSONB),    
+                      inventory,             
+                      stock_movements        
+                    
+```
+
+### Real-Time Flow
+
+```
+User A adds stock 
+  POST /api/inventory/add 
+    DB updated 
+      Socket.IO emits "stock:updated" event 
+        All connected browsers receive event 
+          Dashboard updates instantly (no page refresh)
+```
+
+---
+
+## 6. Database Schema
+
+### Full Schema (PostgreSQL / Prisma)
+
+```prisma
+// schema.prisma
+
+model User {
+  id           String   @id @default(uuid())
+  name         String
+  email        String   @unique
+  password     String
+  role         Role     @default(STAFF)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  movements    StockMovement[]
+  sales        Sale[]
+}
+
+enum Role {
+  ADMIN
+  MANAGER
+  STAFF
+}
+
+model Category {
+  id          String         @id @default(uuid())
+  name        String         @unique
+  description String?
+  color       String?        // hex color for UI badge
+  icon        String?        // icon name
+  fields      ProductField[]
+  products    Product[]
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+}
+
+model ProductField {
+  id           String      @id @default(uuid())
+  categoryId   String
+  category     Category    @relation(fields: [categoryId], references: [id])
+  label        String                          // "Expiry Date"
+  key          String                          // "expiry_date" (snake_case for JSONB key)
+  fieldType    FieldType                       // text | number | date | dropdown | boolean
+  isRequired   Boolean     @default(false)
+  options      Json?                           // for dropdown: ["S", "M", "L", "XL"]
+  unit         String?                         // "kg", "pcs", "ml"
+  sortOrder    Int         @default(0)
+  createdAt    DateTime    @default(now())
+}
+
+enum FieldType {
+  TEXT
+  NUMBER
+  DATE
+  DROPDOWN
+  BOOLEAN
+  TEXTAREA
+}
+
+model Product {
+  id            String          @id @default(uuid())
+  categoryId    String
+  category      Category        @relation(fields: [categoryId], references: [id])
+  name          String
+  sku           String          @unique
+  description   String?
+  price         Decimal?        @db.Decimal(12, 2)
+  costPrice     Decimal?        @db.Decimal(12, 2)
+  unit          String          @default("pcs")
+  barcodeValue  String?         @unique
+  imageUrl      String?
+  customFields  Json            @default("{}")  // { "expiry_date": "2025-12-01", "color": "Red" }
+  isActive      Boolean         @default(true)
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  inventory     Inventory[]
+  movements     StockMovement[]
+  saleItems     SaleItem[]
+}
+
+model Inventory {
+  id          String    @id @default(uuid())
+  productId   String
+  product     Product   @relation(fields: [productId], references: [id])
+  location    String    @default("Main")   // warehouse/location name
+  quantity    Int       @default(0)
+  minStock    Int       @default(0)        // low stock threshold
+  maxStock    Int?                         // optional max
+  updatedAt   DateTime  @updatedAt
+
+  @@unique([productId, location])
+}
+
+model StockMovement {
+  id          String         @id @default(uuid())
+  productId   String
+  product     Product        @relation(fields: [productId], references: [id])
+  userId      String
+  user        User           @relation(fields: [userId], references: [id])
+  type        MovementType
+  quantity    Int
+  location    String         @default("Main")
+  note        String?
+  reference   String?        // e.g. invoice number
+  createdAt   DateTime       @default(now())
+}
+
+enum MovementType {
+  IN          // stock received
+  OUT         // stock removed/used
+  ADJUSTMENT  // manual correction
+  TRANSFER    // between locations
+  SALE        // tied to a sale (optional module)
+  RETURN      // returned item
+}
+
+//  OPTIONAL MODULE: SALES 
+
+model Sale {
+  id          String      @id @default(uuid())
+  userId      String
+  user        User        @relation(fields: [userId], references: [id])
+  total       Decimal     @db.Decimal(12, 2)
+  discount    Decimal?    @db.Decimal(12, 2)
+  note        String?
+  items       SaleItem[]
+  createdAt   DateTime    @default(now())
+}
+
+model SaleItem {
+  id          String   @id @default(uuid())
+  saleId      String
+  sale         Sale    @relation(fields: [saleId], references: [id])
+  productId   String
+  product     Product  @relation(fields: [productId], references: [id])
+  quantity    Int
+  unitPrice   Decimal  @db.Decimal(12, 2)
+  subtotal    Decimal  @db.Decimal(12, 2)
+}
+```
+
+---
+
+## 7. Feature Specifications
+
+### 7.1 Authentication & Role System
+
+**Roles and Permissions:**
+
+| Permission | Admin | Manager | Staff |
+|---|---|---|---|
+| Manage users | | | |
+| Configure categories/fields | | | |
+| Add/edit/delete products | | | |
+| Record stock movements | | | |
+| View inventory & dashboard | | | |
+| Export reports | | | |
+| View movement history | | | |
+| Process sales (optional) | | | |
+
+**Implementation:**
+- Passwords hashed with `bcrypt` (salt rounds: 12)
+- JWT tokens with 8-hour expiry, stored in `httpOnly` cookie (not localStorage)
+- Refresh token mechanism for seamless sessions
+- Failed login lockout after 5 attempts (15-minute cooldown)
+
+---
+
+### 7.2 Product Category & Field Builder (The Core Engine)
+
+This is the most critical module. It allows the admin to define what a "product" looks like for their business.
+
+**Admin can:**
+1. Create a category (e.g., "Medicines", "Electronics", "Clothing")
+2. Add custom fields to each category:
+   - Field label: "Batch Number"
+   - Field key: auto-generated as `batch_number`
+   - Type: Text / Number / Date / Dropdown / Boolean / Textarea
+   - Required: Yes/No
+   - Options (for dropdowns): comma-separated values
+   - Unit: optional suffix ("kg", "ml", "pcs")
+3. Reorder fields via drag-and-drop
+4. Edit or delete fields (with warning if products exist)
+5. Assign a color and icon to the category for visual identification
+
+**Frontend behavior:**
+- When adding/editing a product, the form dynamically renders only the fields for that product's category
+- Required fields are validated before submission
+- Dropdown fields render as `<select>` elements with the defined options
+- Date fields render as date pickers
+
+---
+
+### 7.3 Product Management
+
+**Features:**
+- Add, edit, deactivate products (soft delete  never hard delete)
+- SKU auto-generation (or manual entry) with uniqueness check
+- Barcode value field (can match SKU or be separate)
+- Product image upload (stored locally in `/uploads/`, served as static files)
+- Search by name, SKU, barcode
+- Filter by category, stock status (in stock / low stock / out of stock)
+- Sort by name, quantity, price, last updated
+- Bulk import via CSV upload (template downloadable)
+
+---
+
+### 7.4 Inventory Management (Real-Time)
+
+**Core functionality:**
+- Each product has stock tracked per **location** (e.g., "Main Warehouse", "Store Front")
+- Real-time quantity displayed  updates live via Socket.IO when any user makes a change
+- Low stock badge shown when `quantity <= minStock`
+
+**Stock operations:**
+- **Stock In:** receive goods (with optional reference/invoice number)
+- **Stock Out:** remove stock (with reason/note)
+- **Adjustment:** correct stock count (with mandatory reason)
+- **Transfer:** move stock between locations
+
+**Each operation:**
+- Requires a note/reason
+- Logged immediately to `StockMovement` table
+- Broadcasts `stock:updated` event via Socket.IO to all connected clients
+- Cannot be deleted (audit trail  only adjustments are allowed)
+
+---
+
+### 7.5 Dashboard (Real-Time)
+
+**Widgets:**
+- Total products count
+- Total stock value (sum of `quantity × price` across all products)
+- Low stock items (count + list)
+- Out-of-stock items (count)
+- Recent movements (last 10 actions, live updating)
+- Top 5 products by quantity
+- Stock movements chart (last 7 days  IN vs OUT)
+- Category breakdown (pie/donut chart)
+
+All widgets auto-update in real-time via Socket.IO events. No page refresh needed.
+
+---
+
+### 7.6 Movement History & Audit Log
+
+**Features:**
+- Full paginated log of every stock movement ever made
+- Filter by: product, user, movement type, date range, location
+- Each record shows: product name, old qty, change, new qty, user, timestamp, note
+- Export filtered results to PDF or Excel
+- Movement history cannot be altered (immutable audit trail)
+
+---
+
+### 7.7 Reports & Export
+
+**Available reports:**
+1. **Current Stock Report**  snapshot of all products with quantities and values
+2. **Low Stock Report**  all items below minimum threshold
+3. **Movement Report**  all movements in a date range
+4. **Category Summary**  stock value per category
+5. **Product Valuation**  total inventory value breakdown
+
+**Export formats:**
+- PDF (using `pdfkit`  server-rendered, professional layout with logo)
+- Excel/XLSX (using `exceljs`  full spreadsheet with formatting)
+
+---
+
+### 7.8 Alerts & Notifications
+
+**In-app alerts (real-time):**
+- Low stock toast notification when any product drops below its `minStock` threshold
+- Out-of-stock alert when quantity reaches 0
+- Notification bell icon in navbar with unread count
+
+**Optional email alerts:**
+- Low stock daily digest (if SMTP is configured in `.env`)
+- Configurable: which user roles receive alerts
+
+---
+
+### 7.9 Settings & Configuration Panel
+
+Accessible to Admin only. Covers:
+
+- **Business Info:** name, address, currency, logo (used in reports and labels)
+- **Locations:** manage warehouse/location names
+- **Users:** add, edit, deactivate user accounts, change roles
+- **Low Stock Defaults:** set default minimum threshold for new products
+- **Backup:** export full DB as SQL dump, import from backup
+- **Optional Modules:** toggle Sales Tracking, Label Printing (on/off)
+
+---
+
+## 8. Optional Module: Sales & Label Printing
+
+This module is disabled by default. The admin enables it from Settings  Modules.
+
+### 8.1 Sales Tracking
+
+**Flow:**
+1. Staff opens "New Sale" screen
+2. Scan barcode or search product by name/SKU
+3. Add items to cart with quantity
+4. Apply optional discount
+5. Confirm sale  stock automatically deducted via `StockMovement` (type: SALE)
+6. Sale receipt printable (browser print dialog, formatted layout)
+
+**Dashboard additions (when module enabled):**
+- Today's sales total
+- Number of sales today
+- Best-selling products (last 30 days)
+
+---
+
+### 8.2 Label & Price Tag Printing
+
+**Tier 1  Standard printer (enabled by default):**
+- Generate a printable PDF page with multiple labels laid out on A4/Letter
+- Each label contains: product name, price, barcode image (Code128 or QR), custom fields (optional)
+- Label size configurable: 2×4, 3×5, full-page single label
+- Uses `bwip-js` for barcode generation, `pdfkit` for PDF layout
+- Print via browser's `window.print()`  any connected printer
+
+**Tier 2  Thermal printer (optional, enabled via config):**
+- Requires client to install **QZ Tray** (free, open-source) on the server machine
+- Web app connects to QZ Tray via WebSocket on localhost
+- Sends raw ZPL commands for Zebra printers or ESC/P for other thermal printers
+- Produces professional thermal labels instantly
+- Enabled via `THERMAL_PRINTING=true` in `.env`
+
+---
+
+## 9. API Design
+
+### Base URL
+```
+/api/v1/
+```
+
+### Auth
+```
+POST   /api/v1/auth/login
+POST   /api/v1/auth/logout
+POST   /api/v1/auth/refresh
+GET    /api/v1/auth/me
+```
+
+### Categories & Fields
+```
+GET    /api/v1/categories
+POST   /api/v1/categories
+PATCH  /api/v1/categories/:id
+DELETE /api/v1/categories/:id
+
+GET    /api/v1/categories/:id/fields
+POST   /api/v1/categories/:id/fields
+PATCH  /api/v1/fields/:id
+DELETE /api/v1/fields/:id
+PUT    /api/v1/categories/:id/fields/reorder
+```
+
+### Products
+```
+GET    /api/v1/products           (paginated, filterable)
+GET    /api/v1/products/:id
+POST   /api/v1/products
+PATCH  /api/v1/products/:id
+DELETE /api/v1/products/:id       (soft delete)
+POST   /api/v1/products/import    (CSV bulk import)
+GET    /api/v1/products/:id/barcode  (returns PNG image)
+```
+
+### Inventory
+```
+GET    /api/v1/inventory                   (all stock levels)
+GET    /api/v1/inventory/:productId        (stock by product)
+POST   /api/v1/inventory/movement          (add/remove/adjust/transfer)
+GET    /api/v1/inventory/movements         (paginated history)
+GET    /api/v1/inventory/low-stock         (products below threshold)
+```
+
+### Reports
+```
+GET    /api/v1/reports/stock               (returns JSON)
+GET    /api/v1/reports/stock/export/pdf
+GET    /api/v1/reports/stock/export/excel
+GET    /api/v1/reports/movements/export/pdf
+GET    /api/v1/reports/valuation
+```
+
+### Users (Admin only)
+```
+GET    /api/v1/users
+POST   /api/v1/users
+PATCH  /api/v1/users/:id
+DELETE /api/v1/users/:id
+```
+
+### Sales (Optional module)
+```
+GET    /api/v1/sales
+POST   /api/v1/sales
+GET    /api/v1/sales/:id
+GET    /api/v1/sales/:id/receipt/pdf
+```
+
+### Labels
+```
+POST   /api/v1/labels/generate/pdf         (returns PDF blob)
+POST   /api/v1/labels/generate/zpl         (returns ZPL string for thermal)
+```
+
+### Socket.IO Events
+
+**Server  Client (emitted by server, listened to by client):**
+```
+stock:updated       { productId, location, newQuantity, movement }
+alert:low-stock     { productId, productName, quantity, minStock }
+alert:out-of-stock  { productId, productName }
+sale:completed      { saleId, total, itemCount }
+```
+
+**Client  Server:**
+```
+(all mutations go through REST API, not Socket.IO)
+```
+
+---
+
+## 10. Real-Time Strategy
+
+### Implementation Pattern
+
+```
+Client A (adds stock)     Server              Client B (viewing dashboard)
+                                                     
+       POST /inventory/add                           
+                               
+                            DB updated               
+                            emit("stock:updated")    
+                           
+       { success: true }                              dashboard updates
+                                (no refresh needed)
+```
+
+### Socket.IO Room Strategy
+
+All connected clients join a single shared room (`inventory`). Events are broadcast to this room. This is appropriate because it is a single-business system  all users see the same data.
+
+### Connection Handling
+
+- Clients auto-reconnect on disconnect (Socket.IO default)
+- A reconnect fetches fresh data via REST to catch any missed events
+- Connection status shown in UI (green/yellow dot in navbar)
+
+---
+
+## 11. GitHub Repository Standards
+
+### Repository Files
+
+Every file listed below must exist in the repo root before the first public release:
+
+```
+flexstock/
+ README.md                    Full setup guide, features, screenshots
+ CONTRIBUTING.md              How to contribute, PR process, code style
+ SECURITY.md                  How to report vulnerabilities
+ CHANGELOG.md                 Auto-generated from conventional commits
+ LICENSE                      MIT License
+ CODE_OF_CONDUCT.md           Community standards
+ .github/
+    ISSUE_TEMPLATE/
+       bug_report.yml
+       feature_request.yml
+       config.yml
+    PULL_REQUEST_TEMPLATE.md
+    workflows/
+       ci.yml               Run tests on every PR
+       release.yml          Auto-release on version tag
+       security.yml         Dependency scanning
+    CODEOWNERS               Define file ownership
+ .env.example                 Template  never commit real .env
+ .gitignore
+ docker-compose.yml           Full stack local dev
+ docker-compose.prod.yml      Production-ready setup
+ install.sh                   One-command installer for Linux servers
+ docs/
+     architecture.md
+     api.md
+     deployment.md
+     configuration.md
+```
+
+### README.md Structure
+
+```markdown
+# FlexStock
+[badges: build status, license, version, node version]
+
+> One-line description
+
+## Features
+## Screenshots
+## Quick Start (3 commands to get running)
+## Docker Setup
+## Configuration
+## 📖 Documentation
+## Contributing
+## Security
+## License
+```
+
+### SECURITY.md Must Include
+
+- Supported versions table
+- How to report a vulnerability (email, not public issue)
+- Response timeline commitment (e.g., 48-hour acknowledgment)
+- What to include in a report
+
+### Branch Protection Rules (set in GitHub repo settings)
+
+- `main` branch: require PR review, require status checks to pass, no direct push
+- `develop` branch: require status checks to pass
+- Delete head branch after PR merge: enabled
+
+---
+
+## 12. Git Workflow & Branching
+
+### Branch Strategy: Git Flow (adapted)
+
+```
+main           production-ready code only. Tagged with version releases.
+develop        integration branch. All features merge here first.
+feature/*      individual feature work (e.g. feature/dynamic-fields)
+fix/*          bug fixes (e.g. fix/socket-reconnect)
+hotfix/*       urgent fixes on main (e.g. hotfix/login-crash)
+release/*      release preparation (e.g. release/1.2.0)
+docs/*         documentation-only changes
+```
+
+### Conventional Commits (mandatory)
+
+All commit messages must follow this format:
+
+```
+<type>(<scope>): <short description>
+
+[optional body]
+
+[optional footer]
+```
+
+**Types:**
+
+| Type | When to use |
+|---|---|
+| `feat` | New feature |
+| `fix` | Bug fix |
+| `docs` | Documentation only |
+| `style` | Formatting, no logic change |
+| `refactor` | Code restructure, no feature/fix |
+| `test` | Adding or fixing tests |
+| `chore` | Build tools, dependencies |
+| `perf` | Performance improvement |
+
+**Examples:**
+```
+feat(inventory): add real-time stock updates via Socket.IO
+fix(auth): resolve JWT refresh token race condition
+feat(products): implement dynamic field builder with drag-and-drop
+test(api): add integration tests for stock movement endpoint
+docs(readme): add docker deployment instructions
+chore(deps): upgrade prisma to v5.10
+```
+
+### Commit Rules
+
+- Small, atomic commits  one logical change per commit
+- Never commit directly to `main` or `develop`
+- Every feature/fix lives in its own branch
+- PRs must reference the issue they close (`Closes #42`)
+- Commit messages in present tense, imperative mood ("add" not "added")
+
+---
+
+## 13. CI/CD Pipeline
+
+### `.github/workflows/ci.yml`
+
+Triggered on: every push to `feature/*`, `fix/*`, and every PR to `develop` or `main`.
+
+**Jobs:**
+
+```yaml
+jobs:
+  lint:
+    - ESLint (frontend + backend)
+    - Prettier check
+
+  test:
+    - Unit tests (Vitest)
+    - API integration tests (Supertest)
+    - Test coverage report (minimum 70% required)
+
+  build:
+    - Build frontend (Vite)
+    - Check for TypeScript errors
+
+  security:
+    - npm audit (fail on high/critical vulnerabilities)
+    - Dependabot alerts (weekly scan)
+```
+
+### `.github/workflows/release.yml`
+
+Triggered on: push of a tag matching `v*.*.*` (e.g. `v1.2.0`)
+
+**Jobs:**
+1. Run full CI suite
+2. Build production bundle
+3. Auto-generate `CHANGELOG.md` from conventional commits
+4. Create GitHub Release with release notes
+5. Attach production build artifact to release
+
+---
+
+## 14. Release Strategy
+
+### Semantic Versioning (SemVer)
+
+All releases follow `MAJOR.MINOR.PATCH`:
+
+| Increment | When |
+|---|---|
+| `PATCH` (1.0.**1**) | Bug fixes, security patches |
+| `MINOR` (1.**1**.0) | New backward-compatible features |
+| `MAJOR` (**2**.0.0) | Breaking changes, major redesigns |
+
+### Release Process
+
+```bash
+# 1. Merge develop  release branch
+git checkout -b release/1.2.0 develop
+
+# 2. Bump version in package.json
+npm version minor  # or patch / major
+
+# 3. Update CHANGELOG.md (or auto-generate)
+npx conventional-changelog -p angular -i CHANGELOG.md -s
+
+# 4. PR: release/1.2.0  main
+# After merge:
+
+# 5. Tag the release
+git tag -a v1.2.0 -m "Release v1.2.0"
+git push origin v1.2.0
+
+# 6. GitHub Actions auto-creates the release
+```
+
+### Labels for Issues & PRs
+
+```
+type: bug           confirmed bugs
+type: feature       new feature request
+type: docs          documentation
+type: security      security issue
+priority: critical  blocks release
+priority: high
+priority: low
+status: in-progress
+status: needs-review
+status: blocked
+module: inventory
+module: auth
+module: products
+module: sales
+module: labels
+```
+
+---
+
+## 15. Testing Strategy
+
+### Test Types & Tools
+
+| Type | Tool | What's Tested |
+|---|---|---|
+| Unit | Vitest | Individual functions, utilities, helpers |
+| Component | Vitest + React Testing Library | React components in isolation |
+| API Integration | Supertest | Every API endpoint (happy path + error cases) |
+| E2E | Playwright | Full user flows (login  add product  check stock) |
+
+### Required Test Coverage
+
+- All API routes: 100% covered (Supertest)
+- Business logic services:  80% coverage
+- Frontend components:  60% coverage
+- E2E critical paths: login, add product, stock movement, export report
+
+### Test Database
+
+- Separate test PostgreSQL database (defined in `.env.test`)
+- Seeded with fixture data before each test run
+- Reset between test suites
+
+### Key E2E Test Scenarios
+
+1. Admin creates a category with custom fields
+2. Admin adds a product in that category with all custom fields filled
+3. Staff logs in, records stock-in for the product
+4. Second browser window opens dashboard  quantity updates in real-time
+5. Stock drops below threshold  low stock alert appears
+6. Admin exports stock report as PDF
+7. (Optional) Admin processes a sale  stock auto-decrements
+
+---
+
+## 16. Documentation Standards
+
+### Code Documentation
+
+- Every API route has a JSDoc comment explaining purpose, params, response
+- Every Prisma model has field-level comments
+- Complex business logic has inline comments explaining **why**, not **what**
+- No magic numbers  use named constants
+
+### API Documentation
+
+Maintained in `/docs/api.md` with:
+- Endpoint URL, method, auth requirement
+- Request body example (JSON)
+- Response example (success + error)
+- Status codes
+
+### `docs/` Folder Contents
+
+```
+docs/
+ architecture.md      System diagram + design decisions
+ api.md               Full API reference
+ deployment.md        VPS, shared hosting, Docker setup
+ configuration.md     All .env variables explained
+ custom-fields.md     How the field builder works
+ label-printing.md    Tier 1 and Tier 2 printing setup
+```
+
+---
+
+## 17. Build & Delivery Plan
+
+### Installation Experience (Client Receives This)
+
+```bash
+# Option A: Docker (recommended)
+git clone https://github.com/ilyaskhan12Q/flexstock
+cd flexstock
+cp .env.example .env
+# Edit .env with DB credentials, app name, etc.
+docker-compose up -d
+#  App running at http://localhost:3000
+
+# Option B: Manual (VPS / shared hosting)
+./install.sh
+# Script handles: npm install, prisma migrate, seed, PM2 start
+```
+
+### `.env.example` (Every Variable Documented)
+
+```env
+#  App 
+APP_NAME="My Inventory"           # Shown in header and reports
+APP_URL=http://localhost:3000
+PORT=3000
+NODE_ENV=production
+
+#  Database 
+DATABASE_URL=postgresql://user:password@localhost:5432/flexstock
+
+#  Auth 
+JWT_SECRET=change-this-to-a-long-random-string
+JWT_EXPIRES_IN=8h
+REFRESH_TOKEN_SECRET=another-long-random-string
+
+#  Currency & Locale 
+CURRENCY_SYMBOL=PKR
+DATE_FORMAT=DD/MM/YYYY
+
+#  Optional: Email Alerts 
+SMTP_HOST=
+SMTP_PORT=587
+SMTP_USER=
+SMTP_PASS=
+ALERT_EMAIL=
+
+#  Optional: Label Printing 
+THERMAL_PRINTING=false            # Set to true for QZ Tray thermal support
+LABEL_TEMPLATE=2x4                # 2x4 | 3x5 | single
+```
+
+### Delivery Checklist (Per Client)
+
+```
+ Clone repo  new private repo for client
+ Update APP_NAME and branding in config
+ Update logo in /client/public/logo.png
+ Seed admin user credentials
+ Run: docker-compose up -d (or install.sh)
+ Admin logs in  creates categories and fields
+ Export seed data: npm run db:seed:export
+ Hand off: code, .env (with credentials), setup doc
+ Optional: record a 5-minute Loom video walkthrough
+```
+
+---
+
+## 18. Phase-by-Phase Milestones
+
+Each phase ends with a working, tested, deployable state.
+
+---
+
+### Phase 1  Foundation (Week 12)
+**Goal:** Skeleton with auth, database, and project structure working.
+
+- [ ] Repo created with all GitHub files (README, CONTRIBUTING, SECURITY, etc.)
+- [ ] Branch protection rules configured
+- [ ] GitHub Actions CI pipeline running
+- [ ] Docker Compose for local development (Postgres + Node + Vite)
+- [ ] Prisma schema defined and migrated
+- [ ] Auth system (login, JWT, refresh, logout)
+- [ ] Role middleware (ADMIN / MANAGER / STAFF)
+- [ ] Basic React shell with routing and protected routes
+- [ ] Navbar, sidebar layout
+- [ ] User management CRUD (Admin only)
+
+**Tests:** Auth flow, role protection on all routes
+**Git:** Tag `v0.1.0-alpha` on completion
+
+---
+
+### Phase 2  Product Engine (Week 34)
+**Goal:** Category builder + dynamic product forms working end-to-end.
+
+- [ ] Category CRUD API + UI
+- [ ] Product field definition API (per category)
+- [ ] Field types: text, number, date, dropdown, boolean, textarea
+- [ ] Drag-and-drop field reordering
+- [ ] Dynamic product form (renders based on category's fields)
+- [ ] Product CRUD with custom field validation
+- [ ] SKU uniqueness check + auto-generation
+- [ ] Product list with search, filter, sort
+- [ ] Product image upload
+
+**Tests:** Category/field CRUD, dynamic form validation, product creation
+**Git:** Tag `v0.2.0-alpha`
+
+---
+
+### Phase 3  Inventory Core (Week 56)
+**Goal:** Stock management with real-time updates working.
+
+- [ ] Inventory table seeded per product
+- [ ] Stock In / Stock Out / Adjustment / Transfer operations
+- [ ] Socket.IO server + client integration
+- [ ] Real-time broadcast on every stock movement
+- [ ] Movement history (paginated, filterable)
+- [ ] Low stock threshold per product
+- [ ] Low stock alert (real-time toast + in-app notification bell)
+- [ ] Out-of-stock badge on product list
+
+**Tests:** All movement types, Socket.IO event firing, low stock trigger
+**Git:** Tag `v0.3.0-alpha`
+
+---
+
+### Phase 4  Dashboard & Reports (Week 78)
+**Goal:** Actionable real-time dashboard and professional exports.
+
+- [ ] Dashboard widgets (all real-time)
+- [ ] Stock movements chart (recharts)
+- [ ] Category breakdown chart
+- [ ] Current stock PDF report (`pdfkit`)
+- [ ] Current stock Excel export (`exceljs`)
+- [ ] Movement history PDF + Excel export
+- [ ] Valuation report
+- [ ] CSV bulk product import (with validation and error report)
+
+**Tests:** Report generation, export file integrity, chart data accuracy
+**Git:** Tag `v0.4.0-alpha`
+
+---
+
+### Phase 5  Polish & Settings (Week 9)
+**Goal:** Production-ready core system.
+
+- [ ] Settings panel (business info, currency, logo)
+- [ ] Location management (add warehouse/store names)
+- [ ] Email alerts (SMTP, low stock digest)  optional
+- [ ] DB backup/restore UI
+- [ ] `install.sh` one-command installer
+- [ ] `.env.example` fully documented
+- [ ] Full `docs/` folder written
+- [ ] E2E tests (Playwright) for critical paths
+- [ ] Performance review (query optimization, indexes)
+- [ ] Security review (input sanitization, rate limiting, CORS)
+
+**Git:** Tag `v1.0.0`  first production release
+**GitHub:** Create formal GitHub Release with changelog and deployment guide
+
+---
+
+### Phase 6  Optional Sales Module (Week 1011)
+**Goal:** Sales tracking and receipt printing working as optional toggle.
+
+- [ ] Sales module enable/disable toggle in settings
+- [ ] New Sale screen (search product, add to cart, checkout)
+- [ ] Sale confirmation  auto stock deduction
+- [ ] Sale receipt PDF
+- [ ] Sales history with filter
+- [ ] Dashboard additions (today's sales, best sellers)
+
+**Git:** Tag `v1.1.0`
+
+---
+
+### Phase 7  Optional Label Printing Module (Week 1112)
+**Goal:** Price tag and barcode label printing for both printer types.
+
+- [ ] Barcode generation via `bwip-js`
+- [ ] Label PDF generation (multiple layouts)
+- [ ] Label preview in browser before printing
+- [ ] Tier 2: QZ Tray integration (feature-flagged)
+- [ ] ZPL template for Zebra thermal printers
+- [ ] Label printing from product detail page and sale confirmation
+
+**Git:** Tag `v1.2.0`
+
+---
+
+## Appendix A: File/Folder Structure
+
+```
+flexstock/
+ client/                      React + Vite frontend
+    src/
+       api/                 Axios instances, API functions
+       components/          Reusable UI components
+          ui/              shadcn/ui primitives
+          layout/          Navbar, Sidebar, PageWrapper
+          products/        ProductCard, ProductForm, FieldBuilder
+          inventory/       MovementForm, StockBadge
+          reports/         ReportTable, ExportButton
+          sales/           SaleCart, SaleItem
+       hooks/               useSocket, useInventory, useAuth
+       pages/               Route-level page components
+       store/               Zustand state stores
+       utils/               Formatters, validators
+       main.jsx
+    vite.config.js
+
+ server/                      Node.js + Express backend
+    src/
+       routes/              Express routers
+       controllers/         Request handlers
+       services/            Business logic
+       middleware/          Auth, roles, error handler
+       sockets/             Socket.IO event handlers
+       utils/               Helpers, barcode, PDF generators
+       app.js
+    prisma/
+        schema.prisma
+        migrations/
+        seed.js
+
+ docs/                        Full documentation
+ .github/                     CI/CD, issue templates, PR template
+ docker-compose.yml
+ docker-compose.prod.yml
+ install.sh
+ .env.example
+ package.json                 Root workspace (if monorepo)
+```
+
+---
+
+*This PRD is a living document. Update it as decisions change. Every decision should be traceable to a reason. Every feature should be traceable to a user need.*

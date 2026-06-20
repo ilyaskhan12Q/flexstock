@@ -1,0 +1,274 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 224 71% 4%;
+    --foreground: 213 31% 91%;
+
+    --muted: 223 47% 11%;
+    --muted-foreground: 215.4 16.3% 56.9%;
+
+    --popover: 224 71% 4%;
+    --popover-foreground: 213 31% 91%;
+
+    --card: 224 71% 4%;
+    --card-foreground: 213 31% 91%;
+
+    --border: 216 34% 17%;
+    --input: 216 34% 17%;
+
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+
+    --secondary: 222.2 47.4% 11.2%;
+    --secondary-foreground: 210 40% 98%;
+
+    --accent: 216 34% 17%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 63% 31%;
+    --destructive-foreground: 210 40% 98%;
+
+    --ring: 216 34% 17%;
+
+    --radius: 0.5rem;
+  }
+
+  .light {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+
+    --primary: 222.2 47.4% 11.2%;
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --ring: 215 20.2% 65.1%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+/* Glassmorphism utility */
+.glass-panel {
+  background: rgba(13, 20, 38, 0.45);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.light .glass-panel {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.shadow-premium {
+  box-shadow: 0 4px 32px rgba(0, 0, 0, 0.4), 0 1px 0 rgba(255,255,255,0.04) inset;
+}
+
+.light .shadow-premium {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05), 0 1px 0 rgba(0,0,0,0.02) inset;
+}
+
+.shadow-glass {
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 1px 0 rgba(255,255,255,0.06) inset;
+}
+
+.light .shadow-glass {
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.03), 0 1px 0 rgba(0,0,0,0.01) inset;
+}
+
+/* Reusable form input field */
+.input-field {
+  @apply w-full bg-muted/40 border border-border focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-lg px-3 py-2 text-sm text-foreground outline-none transition placeholder-muted-foreground/60;
+}
+
+/* Reusable form label */
+.label-text {
+  @apply block text-xs font-bold uppercase tracking-wider text-muted-foreground;
+}
+
+/* Bridge styling overrides to make hardcoded slate classes fully theme-responsive */
+.light .bg-slate-950 {
+  background-color: hsl(var(--muted) / 0.3) !important;
+}
+.light .bg-slate-950\/40 {
+  background-color: hsl(var(--muted) / 0.15) !important;
+}
+.light .bg-slate-950\/60 {
+  background-color: hsl(var(--muted) / 0.25) !important;
+}
+.light .bg-slate-900 {
+  background-color: hsl(var(--card)) !important;
+}
+.light .bg-slate-900\/50 {
+  background-color: hsl(var(--card) / 0.5) !important;
+}
+.light .bg-slate-900\/60 {
+  background-color: hsl(var(--card) / 0.6) !important;
+}
+.light .bg-slate-800 {
+  background-color: hsl(var(--muted)) !important;
+}
+.light .bg-slate-800\/20 {
+  background-color: hsl(var(--muted) / 0.2) !important;
+}
+.light .bg-slate-800\/50 {
+  background-color: hsl(var(--muted) / 0.5) !important;
+}
+.light .bg-slate-700 {
+  background-color: hsl(var(--muted) / 0.8) !important;
+}
+.light .border-slate-800 {
+  border-color: hsl(var(--border)) !important;
+}
+.light .border-slate-700 {
+  border-color: hsl(var(--border) / 0.8) !important;
+}
+.light .border-slate-900 {
+  border-color: hsl(var(--border)) !important;
+}
+.light .divide-slate-800 {
+  border-color: hsl(var(--border)) !important;
+}
+.light .divide-slate-800\/60 {
+  border-color: hsl(var(--border) / 0.6) !important;
+}
+.light .divide-slate-900 {
+  border-color: hsl(var(--border)) !important;
+}
+.light .hover\:bg-slate-800\/20:hover {
+  background-color: hsl(var(--muted) / 0.4) !important;
+}
+.light .hover\:bg-slate-800\/40:hover {
+  background-color: hsl(var(--muted) / 0.6) !important;
+}
+.light .hover\:bg-slate-800\/50:hover {
+  background-color: hsl(var(--muted) / 0.7) !important;
+}
+.light .hover\:bg-slate-700:hover {
+  background-color: hsl(var(--muted)) !important;
+}
+.light .text-slate-100 {
+  color: hsl(var(--foreground)) !important;
+}
+.light .text-slate-200 {
+  color: hsl(var(--foreground) / 0.95) !important;
+}
+.light .text-slate-300 {
+  color: hsl(var(--foreground) / 0.85) !important;
+}
+.light .text-slate-400 {
+  color: hsl(var(--muted-foreground)) !important;
+}
+.light .text-slate-500 {
+  color: hsl(var(--muted-foreground) / 0.7) !important;
+}
+.light .text-slate-600 {
+  color: hsl(var(--muted-foreground) / 0.5) !important;
+}
+.light .placeholder-slate-500::placeholder {
+  color: hsl(var(--muted-foreground) / 0.5) !important;
+}
+.light .placeholder-slate-600::placeholder {
+  color: hsl(var(--muted-foreground) / 0.4) !important;
+}
+
+/* Green badge overrides */
+.light .bg-emerald-950 {
+  background-color: rgb(240 253 250) !important;
+  color: rgb(13 148 136) !important;
+  border-color: rgb(204 251 241) !important;
+}
+.light .text-emerald-400 {
+  color: rgb(13 148 136) !important;
+}
+.light .border-emerald-900 {
+  border-color: rgb(204 251 241) !important;
+}
+
+/* Yellow/Amber badge overrides */
+.light .bg-yellow-950\/30 {
+  background-color: rgb(254 252 232) !important;
+  color: rgb(202 138 4) !important;
+  border-color: rgb(254 240 138) !important;
+}
+.light .bg-yellow-950 {
+  background-color: rgb(254 252 232) !important;
+  color: rgb(202 138 4) !important;
+  border-color: rgb(254 240 138) !important;
+}
+.light .text-yellow-300 {
+  color: rgb(161 98 7) !important;
+}
+.light .text-yellow-400\/80 {
+  color: rgb(161 98 7 / 0.8) !important;
+}
+.light .border-yellow-900\/60 {
+  border-color: rgb(254 240 138) !important;
+}
+.light .border-yellow-900 {
+  border-color: rgb(254 240 138) !important;
+}
+.light .bg-yellow-900\/50 {
+  background-color: rgb(254 243 199) !important;
+  color: rgb(217 119 6) !important;
+}
+
+/* Red/Destructive badge overrides */
+.light .bg-red-950 {
+  background-color: rgb(254 242 242) !important;
+  color: rgb(220 38 38) !important;
+  border-color: rgb(254 226 226) !important;
+}
+.light .text-red-400 {
+  color: rgb(220 38 38) !important;
+}
+.light .border-red-900 {
+  border-color: rgb(254 226 226) !important;
+}
+
+/* Blue badge overrides */
+.light .bg-blue-950 {
+  background-color: rgb(239 246 255) !important;
+  color: rgb(37 99 235) !important;
+  border-color: rgb(219 234 254) !important;
+}
+.light .text-blue-400 {
+  color: rgb(37 99 235) !important;
+}
+.light .border-blue-900 {
+  border-color: rgb(219 234 254) !important;
+}

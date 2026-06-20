@@ -1,0 +1,23 @@
+{
+  "businessName": "Test Store Patched",
+  "businessAddress": "",
+  "currencySymbol": "USD",
+  "dateFormat": "DD/MM/YYYY",
+  "logoUrl": null,
+  "defaultMinStock": 5,
+  "locations": [
+    "Main"
+  ],
+  "modules": {
+    "salesEnabled": true,
+    "labelPrintingEnabled": true,
+    "thermalPrinting": false
+  },
+  "smtp": {
+    "host": "",
+    "port": "587",
+    "user": "",
+    "alertEmail": "",
+    "enabled": false
+  }
+}

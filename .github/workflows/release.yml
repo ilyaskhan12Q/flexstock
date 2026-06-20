@@ -1,0 +1,51 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build frontend production bundle
+        working-directory: ./client
+        run: npm run build
+
+      - name: Package release artifact
+        run: |
+          mkdir -p release-artifact
+          cp -r server release-artifact/server
+          cp -r client/dist release-artifact/client-dist
+          cp -r docs release-artifact/docs 2>/dev/null || true
+          cp README.md CHANGELOG.md LICENSE install.sh .env.example release-artifact/ 2>/dev/null || true
+          tar -czf flexstock-${{ github.ref_name }}.tar.gz release-artifact/
+
+      - name: Generate CHANGELOG
+        run: |
+          npx conventional-changelog-cli -p angular -i CHANGELOG.md -s --skip-unstable || echo "Changelog generation skipped"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: flexstock-${{ github.ref_name }}.tar.gz
+          generate_release_notes: true
+          body_path: CHANGELOG.md
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

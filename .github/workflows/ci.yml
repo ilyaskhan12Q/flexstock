@@ -1,0 +1,100 @@
+name: CI
+
+on:
+  push:
+    branches: ['feature/**', 'fix/**', 'develop']
+  pull_request:
+    branches: ['develop', 'main']
+
+jobs:
+  test:
+    name: Test & Lint
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: flexstock_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Set up test environment
+        working-directory: ./server
+        run: |
+          cp ../.env.example .env
+          echo "DATABASE_URL=postgresql://postgres:postgres@localhost:5432/flexstock_test" >> .env
+          echo "JWT_SECRET=test-jwt-secret-for-ci" >> .env
+          echo "REFRESH_TOKEN_SECRET=test-refresh-secret-for-ci" >> .env
+
+      - name: Run Prisma migrations
+        working-directory: ./server
+        run: npx prisma migrate deploy
+
+      - name: Seed test database
+        working-directory: ./server
+        run: npm run prisma:seed
+
+      - name: Run backend tests
+        working-directory: ./server
+        run: npm test
+
+  build:
+    name: Build Frontend
+    runs-on: ubuntu-latest
+    needs: test
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build Vite frontend
+        working-directory: ./client
+        run: npm run build
+
+  security:
+    name: Security Audit
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Audit server dependencies
+        working-directory: ./server
+        run: npm audit --audit-level=high
+
+      - name: Audit client dependencies
+        working-directory: ./client
+        run: npm audit --audit-level=high
