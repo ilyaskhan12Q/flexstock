@@ -1,15 +1,24 @@
 const jwt = require('jsonwebtoken');
 const prisma = require('../lib/prisma');
+const { AppError } = require('./errorHandler');
 
 const authenticate = async (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
+
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return res.status(401).json({ error: 'Authentication token required' });
+      return next(new AppError('Authentication token is required. Please log in.', 401, 'TOKEN_MISSING'));
     }
 
     const token = authHeader.split(' ')[1];
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'super-secret-flexstock-jwt-key');
+
+    let decoded;
+    try {
+      decoded = jwt.verify(token, process.env.JWT_SECRET || 'super-secret-flexstock-jwt-key');
+    } catch (jwtErr) {
+      // Let the global error handler translate JWT-specific error names into messages
+      return next(jwtErr);
+    }
 
     // Fetch user to ensure they are still active
     const user = await prisma.user.findUnique({
@@ -17,11 +26,11 @@ const authenticate = async (req, res, next) => {
     });
 
     if (!user) {
-      return res.status(401).json({ error: 'User not found' });
+      return next(new AppError('Your account no longer exists. Please contact an administrator.', 401, 'USER_NOT_FOUND'));
     }
 
     if (!user.isActive) {
-      return res.status(403).json({ error: 'Account has been deactivated' });
+      return next(new AppError('Your account has been deactivated. Please contact an administrator.', 403, 'ACCOUNT_DEACTIVATED'));
     }
 
     // Attach user metadata to request
@@ -34,21 +43,24 @@ const authenticate = async (req, res, next) => {
 
     next();
   } catch (error) {
-    if (error.name === 'TokenExpiredError') {
-      return res.status(401).json({ error: 'Authentication token expired' });
-    }
-    return res.status(401).json({ error: 'Invalid authentication token' });
+    next(error);
   }
 };
 
 const authorize = (allowedRoles = []) => {
   return (req, res, next) => {
     if (!req.user) {
-      return res.status(401).json({ error: 'Authentication required' });
+      return next(new AppError('Authentication required. Please log in to continue.', 401, 'NOT_AUTHENTICATED'));
     }
 
     if (!allowedRoles.includes(req.user.role)) {
-      return res.status(403).json({ error: 'Access forbidden: Insufficient permissions' });
+      return next(
+        new AppError(
+          `You don't have permission to perform this action. Required role: ${allowedRoles.join(' or ')}.`,
+          403,
+          'INSUFFICIENT_PERMISSIONS'
+        )
+      );
     }
 
     next();
