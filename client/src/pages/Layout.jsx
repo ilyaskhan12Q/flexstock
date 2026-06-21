@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import { useNotificationStore } from '../store/notificationStore';
+import { useFeedbackStore } from '../store/feedbackStore';
 import { useSocket } from '../hooks/useSocket';
 import { 
   LayoutDashboard, 
@@ -18,12 +19,14 @@ import {
   Moon, 
   Menu, 
   X,
-  User as UserIcon
+  User as UserIcon,
+  XCircle
 } from 'lucide-react';
 
 function DashboardShell() {
   const { user, logout } = useAuthStore();
   const { notifications, addNotification, markAsRead, markAllAsRead } = useNotificationStore();
+  const { open: feedbackOpen, isSuccess: feedbackIsSuccess, title: feedbackTitle, message: feedbackMessage, close: closeFeedback } = useFeedbackStore();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [notifDropdownOpen, setNotifDropdownOpen] = useState(false);
   const [theme, setTheme] = useState(localStorage.getItem('theme') || 'dark');
@@ -257,6 +260,34 @@ function DashboardShell() {
         </main>
       </div>
 
+      {/* Global Feedback Modal */}
+      {feedbackOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm">
+          <div className="bg-card border border-border rounded-2xl p-8 max-w-sm w-full mx-4 shadow-2xl text-center space-y-6 animate-scale-up">
+            <div className="flex justify-center">
+              {feedbackIsSuccess ? (
+                <div className="w-20 h-20 bg-emerald-500/10 rounded-full flex items-center justify-center text-emerald-500">
+                  <CheckCircle className="w-12 h-12 stroke-[2.5]" />
+                </div>
+              ) : (
+                <div className="w-20 h-20 bg-red-500/10 rounded-full flex items-center justify-center text-red-500">
+                  <XCircle className="w-12 h-12 stroke-[2.5]" />
+                </div>
+              )}
+            </div>
+            <div className="space-y-2">
+              <h3 className="text-xl font-extrabold text-foreground">{feedbackTitle}</h3>
+              <p className="text-sm text-muted-foreground leading-relaxed">{feedbackMessage}</p>
+            </div>
+            <button
+              onClick={closeFeedback}
+              className={`w-full py-3 rounded-xl font-bold text-white text-base shadow-lg transition duration-200 cursor-pointer ${feedbackIsSuccess ? 'bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700' : 'bg-red-600 hover:bg-red-500 active:bg-red-700'}`}
+            >
+              OK
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import API from '../api';
 import { useSocket } from '../hooks/useSocket';
+import { useFeedbackStore } from '../store/feedbackStore';
 import { 
   ClipboardList, 
   Search, 
@@ -19,6 +20,7 @@ function Inventory() {
   const [movements, setMovements] = useState([]);
   const [pagination, setPagination] = useState({ total: 0, page: 1, limit: 10, pages: 1 });
   const [movPagination, setMovPagination] = useState({ total: 0, page: 1, limit: 10, pages: 1 });
+  const { showSuccess, showError } = useFeedbackStore();
   
   // Search & Filter State
   const [search, setSearch] = useState('');
@@ -145,13 +147,13 @@ function Inventory() {
         reference: txRef
       });
 
-      setMessage('Stock transaction submitted successfully');
+      showSuccess('Transaction Successful', 'Stock transaction submitted successfully.');
       setTxQty('');
       setTxNote('');
       setTxRef('');
       fetchInventory();
     } catch (err) {
-      alert(`Error: ${err.response?.data?.error || err.message}`);
+      showError('Transaction Failed', err.response?.data?.error || err.message);
     }
   };
 
@@ -181,33 +183,98 @@ function Inventory() {
 
             <form onSubmit={handleCreateTransaction} className="space-y-4">
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Select Product</label>
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Scan / Search Product</label>
+                <div className="relative mb-2">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-500" />
+                  <input
+                    type="text"
+                    placeholder="Scan barcode or type name..."
+                    className="w-full bg-slate-950 border border-slate-800 focus:border-blue-500 rounded-lg pl-9 pr-3 py-2 text-sm text-slate-100 placeholder-slate-600 outline-none"
+                    onChange={(e) => {
+                      const val = e.target.value.trim().toLowerCase();
+                      if (!val) return;
+                      const matched = allProducts.find(p => 
+                        p.barcodeValue === val || 
+                        p.sku.toLowerCase() === val || 
+                        p.name.toLowerCase().includes(val)
+                      );
+                      if (matched) {
+                        setSelectedProduct(matched.id);
+                      }
+                    }}
+                  />
+                </div>
+                
                 <select
                   required
-                  className="w-full bg-slate-950 border border-slate-800 focus:border-blue-500 rounded-lg px-3 py-2 text-sm text-slate-100 outline-none"
+                  className="w-full bg-slate-950 border border-slate-800 focus:border-blue-500 rounded-lg px-3 py-2 text-sm text-slate-100 outline-none mb-2"
                   value={selectedProduct}
                   onChange={(e) => setSelectedProduct(e.target.value)}
                 >
-                  <option value="">Choose item...</option>
+                  <option value="">Or choose item manually...</option>
                   {allProducts.map((p) => (
                     <option key={p.id} value={p.id}>{p.name} ({p.sku})</option>
                   ))}
                 </select>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              {selectedProduct && (() => {
+                const prod = allProducts.find(p => p.id === selectedProduct);
+                if (!prod) return null;
+                const catColor = prod.category?.color || '#3B82F6';
+                return (
+                  <div className="p-3 rounded-lg bg-slate-950 border border-slate-800 flex items-center justify-between animate-fade-in">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: catColor }} />
+                        <span className="font-bold text-slate-200 text-sm">{prod.name}</span>
+                      </div>
+                      <span className="text-xs font-mono text-slate-500 block mt-0.5">{prod.sku}</span>
+                    </div>
+                    <span className="text-xs font-bold text-slate-400 bg-slate-900 border border-slate-800 px-2 py-0.5 rounded">
+                      {prod.category?.name || 'No Category'}
+                    </span>
+                  </div>
+                );
+              })()}
+
+              <div className="space-y-4">
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Transaction Type</label>
-                  <select
-                    className="w-full bg-slate-950 border border-slate-800 focus:border-blue-500 rounded-lg px-3 py-2 text-sm text-slate-100 outline-none"
-                    value={txType}
-                    onChange={(e) => setTxType(e.target.value)}
-                  >
-                    <option value="IN">Stock In (+)</option>
-                    <option value="OUT">Stock Out (-)</option>
-                    <option value="ADJUSTMENT">Adjust Count (Set)</option>
-                    <option value="TRANSFER">Transfer Location</option>
-                  </select>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Action Type</label>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setTxType('IN')}
+                      className={`flex items-center gap-2 px-3 py-2.5 rounded-lg border text-xs font-bold transition cursor-pointer ${txType === 'IN' ? 'bg-emerald-500/10 border-emerald-500 text-emerald-400' : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-slate-200'}`}
+                    >
+                      <ArrowUp className="w-4 h-4 text-emerald-500" />
+                      <span>Stock IN</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setTxType('OUT')}
+                      className={`flex items-center gap-2 px-3 py-2.5 rounded-lg border text-xs font-bold transition cursor-pointer ${txType === 'OUT' ? 'bg-red-500/10 border-red-500 text-red-400' : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-slate-200'}`}
+                    >
+                      <ArrowDown className="w-4 h-4 text-red-500" />
+                      <span>Stock OUT</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setTxType('ADJUSTMENT')}
+                      className={`flex items-center gap-2 px-3 py-2.5 rounded-lg border text-xs font-bold transition cursor-pointer ${txType === 'ADJUSTMENT' ? 'bg-amber-500/10 border-amber-500 text-amber-400' : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-slate-200'}`}
+                    >
+                      <Settings2 className="w-4 h-4 text-amber-500" />
+                      <span>Correct Count</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setTxType('TRANSFER')}
+                      className={`flex items-center gap-2 px-3 py-2.5 rounded-lg border text-xs font-bold transition cursor-pointer ${txType === 'TRANSFER' ? 'bg-blue-500/10 border-blue-500 text-blue-400' : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-slate-200'}`}
+                    >
+                      <ArrowRightLeft className="w-4 h-4 text-blue-500" />
+                      <span>Transfer</span>
+                    </button>
+                  </div>
                 </div>
 
                 <div>
@@ -217,7 +284,7 @@ function Inventory() {
                     min="1"
                     required
                     placeholder="Count"
-                    className="w-full bg-slate-950 border border-slate-800 focus:border-blue-500 rounded-lg px-3 py-2 text-sm text-slate-100 outline-none"
+                    className="w-full bg-slate-950 border border-slate-800 focus:border-blue-500 rounded-lg px-3 py-2 text-sm text-slate-100 outline-none font-bold"
                     value={txQty}
                     onChange={(e) => setTxQty(e.target.value)}
                   />
@@ -353,18 +420,22 @@ function Inventory() {
 
                         return (
                           <tr key={item.id} className={`hover:bg-slate-800/20 transition-all duration-300 ${flashClass}`}>
-                            <td className="px-4 py-3 font-semibold text-slate-100">{item.product.name}</td>
+                            <td className="px-4 py-3 font-semibold text-slate-100 flex items-center gap-2.5">
+                              <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: item.product.category?.color || '#475569' }} title={item.product.category?.name || 'No Category'} />
+                              <span>{item.product.name}</span>
+                            </td>
                             <td className="px-4 py-3 font-mono text-xs text-slate-400">{item.product.sku}</td>
                             <td className="px-4 py-3 text-slate-400 font-medium">{item.location}</td>
                             <td className="px-4 py-3 text-center font-extrabold text-slate-200">{item.quantity}</td>
                             <td className="px-4 py-3 text-center text-slate-500">{item.minStock}</td>
                             <td className="px-4 py-3 text-center">
-                              <span className={`text-[10px] font-bold px-2 py-0.5 rounded border ${
+                              <span className={`text-[10px] font-bold px-2 py-0.5 rounded border inline-flex items-center gap-1 ${
                                 isOut ? 'bg-red-950 text-red-400 border-red-900' :
                                 isLow ? 'bg-yellow-950 text-yellow-400 border-yellow-900' :
                                 'bg-emerald-950 text-emerald-400 border-emerald-900'
                               }`}>
-                                {isOut ? 'Out of Stock' : isLow ? 'Low Stock' : 'In Stock'}
+                                <span>{isOut ? '🛑' : isLow ? '⚠️' : '✅'}</span>
+                                <span>{isOut ? 'Out of Stock' : isLow ? 'Low Stock' : 'In Stock'}</span>
                               </span>
                             </td>
                           </tr>

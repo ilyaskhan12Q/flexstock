@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import API from '../api';
+import { useFeedbackStore } from '../store/feedbackStore';
 import { 
   ShoppingCart, 
   Search, 
@@ -25,13 +26,51 @@ function Sales() {
   const [receiptOpen, setReceiptOpen] = useState(false);
   const [completedSale, setCompletedSale] = useState(null);
 
+  const { showSuccess, showError } = useFeedbackStore();
+  const searchInputRef = useRef(null);
+
   const currencySymbol = import.meta.env.VITE_CURRENCY_SYMBOL || 'PKR';
 
-  // Search products as user types
+  // Auto-focus search input on mount and handle global keybind to refocus scanner
+  useEffect(() => {
+    searchInputRef.current?.focus();
+
+    const handleKeyDown = (e) => {
+      // Focus search input on Escape or F2 key
+      if (e.key === 'Escape' || e.key === 'F2') {
+        e.preventDefault();
+        searchInputRef.current?.focus();
+        searchInputRef.current?.select();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  // Search products as user types or scans barcode
   useEffect(() => {
     if (search.trim()) {
+      const checkAndAddBarcode = async () => {
+        try {
+          const res = await API.get('/products', {
+            params: { search: search.trim(), limit: 5 }
+          });
+          const found = res.data.products;
+          // If exactly one match is found and it has matching barcode or SKU, auto-add
+          if (found.length === 1 && (found[0].barcodeValue === search.trim() || found[0].sku === search.trim())) {
+            handleAddToCart(found[0]);
+            return;
+          }
+          // Normal search
+          searchProducts();
+        } catch (err) {
+          console.error(err);
+        }
+      };
+
       const delayDebounceFn = setTimeout(() => {
-        searchProducts();
+        checkAndAddBarcode();
       }, 300);
       return () => clearTimeout(delayDebounceFn);
     } else {
@@ -59,7 +98,7 @@ function Sales() {
       // Find stock quantity available at Main shop location
       const mainStock = prod.inventory?.find(inv => inv.location === 'Main')?.quantity || 0;
       if (mainStock <= 0) {
-        alert('Item is out of stock at Main Location');
+        showError('Out of Stock', 'Item is out of stock at Main Location');
         return;
       }
 
@@ -81,7 +120,7 @@ function Sales() {
       if (item.id === id) {
         const count = parseInt(qty);
         if (count > item.maxStock) {
-          alert(`Insufficient stock. Available: ${item.maxStock}`);
+          showError('Insufficient Stock', `Insufficient stock. Available: ${item.maxStock}`);
           return item;
         }
         return { ...item, quantity: Math.max(1, count) };
@@ -131,6 +170,7 @@ function Sales() {
       // Show receipt modal
       setCompletedSale(res.data);
       setReceiptOpen(true);
+      showSuccess('Sale Completed', `Sale #${res.data.id.substring(0, 8)} recorded successfully!`);
       
       // Clear Cart state
       setCart([]);
@@ -138,7 +178,7 @@ function Sales() {
       setCashPaid('');
       setNote('');
     } catch (err) {
-      alert(`Checkout failed: ${err.response?.data?.error || err.message}`);
+      showError('Checkout Failed', err.response?.data?.error || err.message);
     }
   };
 
@@ -157,12 +197,12 @@ function Sales() {
 
           <div className="relative">
             <input
+              ref={searchInputRef}
               type="text"
               placeholder="Scan barcode or type name..."
-              className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2.5 text-sm text-slate-100 placeholder-slate-600 outline-none focus:border-blue-500"
+              className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2.5 text-sm text-slate-100 placeholder-slate-600 outline-none focus:border-blue-500 font-bold"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              autoFocus
             />
           </div>
 
