@@ -3,6 +3,7 @@ const cors = require('cors');
 const path = require('path');
 const dotenv = require('dotenv');
 const rateLimit = require('express-rate-limit');
+const { globalErrorHandler } = require('./middleware/errorHandler');
 
 dotenv.config({ path: path.join(__dirname, '../../.env') });
 
@@ -106,21 +107,20 @@ app.use('/api/v1/sales',       salesRouter);
 app.use('/api/v1/labels',      labelsLimiter, labelsRouter);
 app.use('/api/v1/settings',    settingsRouter);
 
-// ── Global Error Handler ──────────────────────────────────────
-// Never expose stack traces in production — log server errors, return safe message
-app.use((err, req, res, next) => {
-  const status = err.status || 500;
-
-  if (status >= 500) {
-    console.error(`[${new Date().toISOString()}] ${req.method} ${req.path} -> ${status}`);
-    console.error(err.stack);
-  }
-
-  res.status(status).json({
-    error: process.env.NODE_ENV === 'production' && status === 500
-      ? 'An internal server error occurred'
-      : err.message || 'Internal Server Error'
+// ── 404 Handler — catches requests to undefined routes ────────
+app.use((req, res) => {
+  res.status(404).json({
+    success: false,
+    error: {
+      code: 'NOT_FOUND',
+      message: `The requested resource '${req.originalUrl}' was not found on this server.`
+    }
   });
 });
+
+// ── Global Error Handler ───────────────────────────────────────
+// All errors forwarded via next(err) land here.
+// Handles Prisma errors, JWT errors, validation, file-upload limits, and unknown 500s.
+app.use(globalErrorHandler);
 
 module.exports = app;
