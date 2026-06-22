@@ -20,7 +20,8 @@ import {
   Menu, 
   X,
   User as UserIcon,
-  XCircle
+  XCircle,
+  CheckCircle
 } from 'lucide-react';
 
 function DashboardShell() {
@@ -99,29 +100,29 @@ function DashboardShell() {
   };
 
   return (
-    <div className="min-h-screen flex bg-background text-foreground font-sans">
+    <div className="min-h-screen flex bg-background text-foreground font-sans antialiased selection:bg-primary/20">
       
       {/* Sidebar for Desktop */}
-      <aside className={`fixed inset-y-0 left-0 z-40 w-64 bg-card border-r border-border transition-transform md:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+      <aside className={`fixed inset-y-0 left-0 z-40 w-60 bg-card border-r border-border transition-transform md:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
         <div className="flex flex-col h-full">
           
           {/* Logo Brand Header */}
-          <div className="h-16 flex items-center justify-between px-6 border-b border-border bg-card/50">
-            <Link to="/" className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-gradient-to-tr from-blue-600 to-emerald-500 rounded-lg flex items-center justify-center shadow">
-                <Package className="w-5 h-5 text-white" />
+          <div className="h-14 flex items-center justify-between px-5 border-b border-border bg-card">
+            <Link to="/" className="flex items-center gap-2">
+              <div className="w-6.5 h-6.5 bg-primary rounded-md flex items-center justify-center shadow-sm">
+                <Package className="w-3.5 h-3.5 text-primary-foreground" />
               </div>
-              <span className="font-bold text-lg tracking-tight bg-gradient-to-r from-blue-600 to-emerald-500 dark:from-blue-100 dark:to-emerald-300 bg-clip-text text-transparent">
+              <span className="font-bold text-sm tracking-tight text-foreground">
                 {appName}
               </span>
             </Link>
             <button className="md:hidden text-muted-foreground hover:text-foreground" onClick={() => setSidebarOpen(false)}>
-              <X className="w-6 h-6" />
+              <X className="w-5 h-5" />
             </button>
           </div>
- 
+  
           {/* Navigation Links */}
-          <nav className="flex-1 px-4 py-6 space-y-1.5 overflow-y-auto">
+          <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
             {filteredNavItems.map((item) => {
               const active = location.pathname === item.path;
               const Icon = item.icon;
@@ -130,35 +131,35 @@ function DashboardShell() {
                   key={item.path}
                   to={item.path}
                   onClick={() => setSidebarOpen(false)}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition ${active ? 'bg-gradient-to-r from-blue-600/20 to-emerald-600/5 border-l-4 border-blue-500 text-foreground font-semibold shadow-sm' : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'}`}
+                  className={`flex items-center gap-2.5 px-3 py-1.5 rounded-md text-xs font-semibold transition ${active ? 'bg-secondary text-foreground font-semibold border-l-2 border-primary' : 'text-muted-foreground hover:bg-muted/40 hover:text-foreground'}`}
                 >
-                  <Icon className="w-5 h-5" />
+                  <Icon className="w-3.5 h-3.5" />
                   <span>{item.name}</span>
                 </Link>
               );
             })}
           </nav>
- 
+  
           {/* Logged in User Profile Footer info */}
-          <div className="p-4 border-t border-border bg-card/40">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center border border-border text-blue-500">
-                <UserIcon className="w-5 h-5" />
+          <div className="p-3 border-t border-border bg-card">
+            <div className="flex items-center gap-2.5 mb-3">
+              <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center border border-border text-primary">
+                <UserIcon className="w-4 h-4" />
               </div>
               <div className="min-w-0 flex-1">
-                <h4 className="text-sm font-semibold truncate text-foreground">{user?.name}</h4>
-                <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
+                <h4 className="text-xs font-bold truncate text-foreground leading-tight">{user?.name}</h4>
+                <p className="text-[10px] text-muted-foreground truncate">{user?.email}</p>
               </div>
-              <span className={`text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider ${user?.role === 'ADMIN' ? 'bg-red-500/10 text-red-500 border border-red-500/20' : user?.role === 'MANAGER' ? 'bg-blue-500/10 text-blue-500 border border-blue-500/20' : 'bg-muted text-muted-foreground'}`}>
+              <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider ${user?.role === 'ADMIN' ? 'bg-red-500/10 text-red-500 border border-red-500/20' : user?.role === 'MANAGER' ? 'bg-blue-500/10 text-blue-500 border border-blue-500/20' : 'bg-muted text-muted-foreground'}`}>
                 {user?.role}
               </span>
             </div>
- 
+  
             <button
               onClick={handleLogout}
-              className="w-full flex items-center justify-center gap-2 py-2 rounded-lg bg-muted border border-border hover:bg-red-500/10 hover:border-red-500/30 hover:text-red-600 text-muted-foreground text-sm font-medium transition cursor-pointer"
+              className="w-full flex items-center justify-center gap-1.5 py-1.5 rounded-md bg-secondary border border-border hover:bg-red-500/10 hover:border-red-500/20 hover:text-red-500 text-muted-foreground text-xs font-semibold transition cursor-pointer"
             >
-              <LogOut className="w-4 h-4" />
+              <LogOut className="w-3.5 h-3.5" />
               <span>Sign Out</span>
             </button>
           </div>
@@ -167,43 +168,43 @@ function DashboardShell() {
       </aside>
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col md:pl-64 min-w-0">
+      <div className="flex-1 flex flex-col md:pl-60 min-w-0">
         
         {/* Top Navbar */}
-        <header className="h-16 flex items-center justify-between px-6 border-b border-border bg-card/60 backdrop-blur-md sticky top-0 z-30">
-          <div className="flex items-center gap-4">
+        <header className="h-14 flex items-center justify-between px-5 border-b border-border bg-card/65 backdrop-blur-md sticky top-0 z-30">
+          <div className="flex items-center gap-3">
             <button className="md:hidden text-muted-foreground hover:text-foreground" onClick={() => setSidebarOpen(true)}>
-              <Menu className="w-6 h-6" />
+              <Menu className="w-5 h-5" />
             </button>
-            <h2 className="text-lg font-semibold tracking-tight text-foreground">
+            <h2 className="text-sm font-bold tracking-tight text-foreground">
               {filteredNavItems.find((item) => item.path === location.pathname)?.name || 'App'}
             </h2>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
             {/* Real-time Connection Indicator */}
-            <span className={`text-xs flex items-center gap-1.5 px-2.5 py-1 rounded-full ${isConnected ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20' : 'bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 border border-yellow-500/20'}`}>
-              <span className={`w-2 h-2 rounded-full ${isConnected ? 'bg-emerald-500 animate-pulse' : 'bg-yellow-500'}`} />
+            <span className={`text-[10px] flex items-center gap-1.5 px-2 py-0.5 rounded-full ${isConnected ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20' : 'bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 border border-yellow-500/20'}`}>
+              <span className={`w-1.5 h-1.5 rounded-full ${isConnected ? 'bg-emerald-500 animate-pulse' : 'bg-yellow-500'}`} />
               {isConnected ? 'Realtime Live' : 'Offline'}
             </span>
 
             {/* Dark/Light Mode Toggler */}
             <button
               onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-              className="p-2 rounded-lg bg-muted border border-border hover:bg-muted/80 text-muted-foreground hover:text-foreground transition cursor-pointer"
+              className="p-1.5 rounded-md bg-secondary border border-border hover:brightness-105 text-muted-foreground hover:text-foreground transition cursor-pointer"
             >
-              {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+              {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
             </button>
 
             {/* Notifications Bell Dropdown */}
             <div className="relative">
               <button
                 onClick={() => setNotifDropdownOpen(!notifDropdownOpen)}
-                className="relative p-2 rounded-lg bg-muted border border-border hover:bg-muted/80 text-muted-foreground hover:text-foreground transition cursor-pointer"
+                className="relative p-1.5 rounded-md bg-secondary border border-border hover:brightness-105 text-muted-foreground hover:text-foreground transition cursor-pointer"
               >
-                <Bell className="w-5 h-5" />
+                <Bell className="w-4 h-4" />
                 {unreadNotifCount > 0 && (
-                  <span className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-600 rounded-full text-[10px] font-bold flex items-center justify-center text-white border-2 border-background">
+                  <span className="absolute -top-1 -right-1 w-4.5 h-4.5 bg-red-600 rounded-full text-[9px] font-bold flex items-center justify-center text-white border-2 border-background">
                     {unreadNotifCount}
                   </span>
                 )}
@@ -212,34 +213,34 @@ function DashboardShell() {
               {notifDropdownOpen && (
                 <>
                   <div className="fixed inset-0 z-40" onClick={() => setNotifDropdownOpen(false)} />
-                  <div className="absolute right-0 mt-2 w-80 rounded-xl bg-card border border-border shadow-glass py-2 z-50 text-sm">
-                    <div className="flex items-center justify-between px-4 py-2 border-b border-border">
+                  <div className="absolute right-0 mt-1.5 w-72 rounded-md bg-card border border-border shadow-premium py-1.5 z-50 text-xs">
+                    <div className="flex items-center justify-between px-3.5 py-1.5 border-b border-border">
                       <span className="font-semibold text-foreground">Alerts Log</span>
                       {unreadNotifCount > 0 && (
                         <button
                           onClick={() => { markAllAsRead(); setNotifDropdownOpen(false); }}
-                          className="text-xs text-blue-500 hover:text-blue-600 font-medium cursor-pointer"
+                          className="text-[10px] text-primary hover:brightness-110 font-bold cursor-pointer"
                         >
                           Mark all read
                         </button>
                       )}
                     </div>
                     
-                    <div className="max-h-72 overflow-y-auto divide-y divide-border">
+                    <div className="max-h-64 overflow-y-auto divide-y divide-border">
                       {notifications.length === 0 ? (
-                        <div className="p-6 text-center text-muted-foreground">No active alerts.</div>
+                        <div className="p-5 text-center text-muted-foreground text-xs">No active alerts.</div>
                       ) : (
                         notifications.map((notif) => (
                           <div
                             key={notif.id}
-                            className={`p-3 transition hover:bg-muted/40 flex items-start gap-2.5 ${!notif.read ? 'bg-blue-500/5' : ''}`}
+                            className={`p-3 transition hover:bg-muted/40 flex items-start gap-2.5 ${!notif.read ? 'bg-primary/5' : ''}`}
                             onClick={() => { markAsRead(notif.id); }}
                           >
-                            <span className={`w-2 h-2 rounded-full mt-1.5 flex-shrink-0 ${notif.type === 'error' ? 'bg-red-500' : notif.type === 'warning' ? 'bg-yellow-500' : 'bg-emerald-500'}`} />
+                            <span className={`w-1.5 h-1.5 rounded-full mt-1.5 flex-shrink-0 ${notif.type === 'error' ? 'bg-red-500' : notif.type === 'warning' ? 'bg-yellow-500' : 'bg-emerald-500'}`} />
                             <div className="min-w-0 flex-1">
-                              <p className="font-medium text-foreground text-xs">{notif.title}</p>
-                              <p className="text-muted-foreground text-xs mt-0.5 leading-relaxed">{notif.message}</p>
-                              <span className="text-[10px] text-muted-foreground/60 block mt-1">
+                              <p className="font-bold text-foreground text-xs">{notif.title}</p>
+                              <p className="text-muted-foreground text-[10px] mt-0.5 leading-relaxed">{notif.message}</p>
+                              <span className="text-[9px] text-muted-foreground/60 block mt-1">
                                 {new Date(notif.timestamp).toLocaleTimeString()}
                               </span>
                             </div>
@@ -255,33 +256,33 @@ function DashboardShell() {
         </header>
 
         {/* Dynamic Nested Route Content */}
-        <main className="flex-1 p-6 overflow-y-auto">
+        <main className="flex-1 p-5 overflow-y-auto">
           <Outlet />
         </main>
       </div>
 
       {/* Global Feedback Modal */}
       {feedbackOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm">
-          <div className="bg-card border border-border rounded-2xl p-8 max-w-sm w-full mx-4 shadow-2xl text-center space-y-6 animate-scale-up">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-[2px]">
+          <div className="bg-card border border-border rounded-md p-6 max-w-sm w-full mx-4 shadow-premium text-center space-y-5 animate-scale-up text-foreground">
             <div className="flex justify-center">
               {feedbackIsSuccess ? (
-                <div className="w-20 h-20 bg-emerald-500/10 rounded-full flex items-center justify-center text-emerald-500">
-                  <CheckCircle className="w-12 h-12 stroke-[2.5]" />
+                <div className="w-16 h-16 bg-emerald-500/10 rounded-full flex items-center justify-center text-emerald-500 border border-emerald-500/20">
+                  <CheckCircle className="w-10 h-10 stroke-[2]" />
                 </div>
               ) : (
-                <div className="w-20 h-20 bg-red-500/10 rounded-full flex items-center justify-center text-red-500">
-                  <XCircle className="w-12 h-12 stroke-[2.5]" />
+                <div className="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center text-red-500 border border-red-500/20">
+                  <XCircle className="w-10 h-10 stroke-[2]" />
                 </div>
               )}
             </div>
-            <div className="space-y-2">
-              <h3 className="text-xl font-extrabold text-foreground">{feedbackTitle}</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">{feedbackMessage}</p>
+            <div className="space-y-1.5">
+              <h3 className="text-base font-bold text-foreground">{feedbackTitle}</h3>
+              <p className="text-xs text-muted-foreground leading-relaxed">{feedbackMessage}</p>
             </div>
             <button
               onClick={closeFeedback}
-              className={`w-full py-3 rounded-xl font-bold text-white text-base shadow-lg transition duration-200 cursor-pointer ${feedbackIsSuccess ? 'bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700' : 'bg-red-600 hover:bg-red-500 active:bg-red-700'}`}
+              className={`w-full py-2 rounded-md font-semibold text-white text-xs shadow-sm transition cursor-pointer ${feedbackIsSuccess ? 'bg-emerald-600 hover:brightness-105' : 'bg-red-600 hover:brightness-105'}`}
             >
               OK
             </button>

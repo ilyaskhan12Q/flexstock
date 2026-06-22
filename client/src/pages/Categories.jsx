@@ -193,50 +193,50 @@ function Categories() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       
       {/* Toast Alert Info Block */}
       {message && (
-        <div className="p-4 rounded-xl bg-slate-900 border border-slate-800 flex justify-between items-center text-sm">
-          <div className="flex items-center gap-2 text-slate-300">
-            <Info className="w-4 h-4 text-blue-400" />
+        <div className="p-3.5 rounded-md bg-secondary border border-border flex justify-between items-center text-xs shadow-sm">
+          <div className="flex items-center gap-2 text-foreground">
+            <Info className="w-4 h-4 text-primary" />
             <span>{message}</span>
           </div>
-          <button onClick={() => setMessage('')} className="text-xs font-semibold text-slate-500 hover:text-slate-300">Dismiss</button>
+          <button onClick={() => setMessage('')} className="text-[10px] font-bold text-muted-foreground hover:text-foreground cursor-pointer transition">Dismiss</button>
         </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         
         {/* Left Side: Create / List Categories */}
-        <div className="space-y-6 lg:col-span-1">
+        <div className="space-y-5 lg:col-span-1">
           
           {/* Create Category Form */}
-          <div className="p-6 rounded-xl border border-slate-800 bg-slate-900/50 glass-panel">
-            <h3 className="text-base font-semibold text-slate-200 mb-4 flex items-center gap-2">
-              <FolderPlus className="w-5 h-5 text-emerald-400" />
+          <div className="p-5 rounded-md border border-border bg-card shadow-sm">
+            <h3 className="text-xs font-bold text-foreground mb-3.5 flex items-center gap-2 uppercase tracking-wider text-muted-foreground">
+              <FolderPlus className="w-4 h-4 text-primary" />
               <span>{editingCatId ? 'Edit Category' : 'Create Category'}</span>
             </h3>
             
             <form onSubmit={handleAddCategory} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Category Name</label>
+                <label className="block text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Category Name</label>
                 <input
                   type="text"
                   required
                   placeholder="e.g. Medicines, Electronics"
-                  className="w-full bg-slate-950 border border-slate-800 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-lg px-3 py-2 text-slate-100 placeholder-slate-600 outline-none text-sm"
+                  className="w-full bg-background border border-border focus:border-primary focus:ring-1 focus:ring-primary rounded-md px-3 py-1.5 text-xs text-foreground placeholder-muted-foreground/50 outline-none transition"
                   value={catName}
                   onChange={(e) => setCatName(e.target.value)}
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Description</label>
+                <label className="block text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Description</label>
                 <textarea
                   placeholder="Describe what items fit here..."
                   rows={2}
-                  className="w-full bg-slate-950 border border-slate-800 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-lg px-3 py-2 text-slate-100 placeholder-slate-600 outline-none text-sm"
+                  className="w-full bg-background border border-border focus:border-primary focus:ring-1 focus:ring-primary rounded-md px-3 py-1.5 text-xs text-foreground placeholder-muted-foreground/50 outline-none transition"
                   value={catDesc}
                   onChange={(e) => setCatDesc(e.target.value)}
                 />
@@ -244,18 +244,18 @@ function Categories() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Theme Color</label>
+                  <label className="block text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Theme Color</label>
                   <input
                     type="color"
-                    className="w-full bg-slate-950 border border-slate-800 rounded-lg h-9 p-1 cursor-pointer"
+                    className="w-full bg-background border border-border rounded-md h-8 p-1 cursor-pointer transition"
                     value={catColor}
                     onChange={(e) => setCatColor(e.target.value)}
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Icon Identifier</label>
+                  <label className="block text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Icon Identifier</label>
                   <select
-                    className="w-full bg-slate-950 border border-slate-800 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-lg px-3 py-2 text-slate-100 outline-none text-sm"
+                    className="w-full bg-background border border-border focus:border-primary focus:ring-1 focus:ring-primary rounded-md px-3 py-1.5 text-xs text-foreground outline-none transition"
                     value={catIcon}
                     onChange={(e) => setCatIcon(e.target.value)}
                   >
@@ -269,19 +269,19 @@ function Categories() {
                 </div>
               </div>
 
-              <div className="flex gap-2 pt-2">
+              <div className="flex gap-2 pt-1.5">
                 <button
                   type="submit"
-                  className="flex-1 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-medium text-sm transition cursor-pointer flex items-center justify-center gap-1.5"
+                  className="flex-1 py-1.5 rounded-md bg-primary hover:brightness-110 text-primary-foreground font-semibold text-xs transition cursor-pointer flex items-center justify-center gap-1.5"
                 >
                   <Check className="w-4 h-4" />
-                  <span>{editingCatId ? 'Save Category' : 'Create'}</span>
+                  <span>{editingCatId ? 'Save' : 'Create'}</span>
                 </button>
                 {editingCatId && (
                   <button
                     type="button"
                     onClick={() => { setEditingCatId(null); setCatName(''); setCatDesc(''); }}
-                    className="px-4 py-2 rounded-lg bg-slate-800 border border-slate-700 hover:bg-slate-700 text-slate-300 text-sm font-medium transition"
+                    className="px-3 py-1.5 rounded-md bg-secondary border border-border hover:brightness-105 text-foreground text-xs font-semibold transition"
                   >
                     Cancel
                   </button>
@@ -291,8 +291,8 @@ function Categories() {
           </div>
 
           {/* Categories List */}
-          <div className="p-6 rounded-xl border border-slate-800 bg-slate-900/50 glass-panel">
-            <h3 className="text-base font-semibold text-slate-200 mb-4">Categories</h3>
+          <div className="p-5 rounded-md border border-border bg-card shadow-sm">
+            <h3 className="text-xs font-bold text-foreground mb-3.5 uppercase tracking-wider text-muted-foreground">Categories</h3>
             <div className="space-y-2">
               {categories.map((cat) => {
                 const isSelected = selectedCategory?.id === cat.id;
@@ -300,32 +300,32 @@ function Categories() {
                   <div
                     key={cat.id}
                     onClick={() => handleSelectCategory(cat)}
-                    className={`p-3 rounded-lg border flex items-center justify-between cursor-pointer transition ${
+                    className={`p-2.5 rounded-md border flex items-center justify-between cursor-pointer transition ${
                       isSelected 
-                        ? 'bg-slate-800/80 border-blue-500' 
-                        : 'bg-slate-950 border-slate-800 hover:border-slate-700'
+                        ? 'bg-secondary border-primary' 
+                        : 'bg-background border-border hover:border-muted-foreground/30'
                     }`}
                   >
-                    <div className="flex items-center gap-3">
-                      <span className="w-3 h-3 rounded-full" style={{ backgroundColor: cat.color || '#3b82f6' }} />
+                    <div className="flex items-center gap-2.5">
+                      <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: cat.color || '#3b82f6' }} />
                       <div>
-                        <h4 className="font-semibold text-sm text-slate-200">{cat.name}</h4>
-                        <p className="text-xs text-slate-500">{cat.fields?.length || 0} custom fields</p>
+                        <h4 className="font-semibold text-xs text-foreground">{cat.name}</h4>
+                        <p className="text-[10px] text-muted-foreground">{cat.fields?.length || 0} custom fields</p>
                       </div>
                     </div>
                     
-                    <div className="flex gap-1.5" onClick={(e) => e.stopPropagation()}>
+                    <div className="flex gap-1" onClick={(e) => e.stopPropagation()}>
                       <button
                         onClick={() => handleEditCategoryStart(cat)}
-                        className="p-1 text-slate-400 hover:text-blue-400 rounded transition"
+                        className="p-1 text-muted-foreground hover:text-primary rounded transition"
                       >
-                        <Edit className="w-4 h-4" />
+                        <Edit className="w-3.5 h-3.5" />
                       </button>
                       <button
                         onClick={() => handleDeleteCategory(cat.id)}
-                        className="p-1 text-slate-400 hover:text-red-400 rounded transition"
+                        className="p-1 text-muted-foreground hover:text-red-500 rounded transition"
                       >
-                        <Trash2 className="w-4 h-4" />
+                        <Trash2 className="w-3.5 h-3.5" />
                       </button>
                     </div>
                   </div>
@@ -339,86 +339,86 @@ function Categories() {
         {/* Right Side: dynamic Schema Custom Field Designer */}
         <div className="lg:col-span-2">
           {selectedCategory ? (
-            <div className="p-6 rounded-xl border border-slate-800 bg-slate-900/50 glass-panel space-y-6">
+            <div className="p-5 rounded-md border border-border bg-card shadow-sm space-y-5">
               
               {/* Category Header metadata info */}
-              <div className="flex justify-between items-start border-b border-slate-800 pb-4">
+              <div className="flex justify-between items-start border-b border-border pb-4">
                 <div>
                   <div className="flex items-center gap-2.5">
-                    <span className="w-3 h-3 rounded-full" style={{ backgroundColor: selectedCategory.color || '#3b82f6' }} />
-                    <h2 className="text-lg font-bold text-slate-100">{selectedCategory.name} Schema Designer</h2>
+                    <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: selectedCategory.color || '#3b82f6' }} />
+                    <h2 className="text-sm font-bold text-foreground">{selectedCategory.name} Schema Designer</h2>
                   </div>
-                  <p className="text-xs text-slate-400 mt-1">{selectedCategory.description || 'No description provided.'}</p>
+                  <p className="text-[10px] text-muted-foreground mt-1">{selectedCategory.description || 'No description provided.'}</p>
                 </div>
 
                 <div className="flex gap-2">
                   <button
                     onClick={handleAddFieldDef}
-                    className="flex items-center gap-1 px-3 py-1.5 bg-slate-800 border border-slate-700 hover:bg-slate-700 text-slate-200 rounded-lg text-xs font-semibold transition cursor-pointer"
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-secondary border border-border hover:brightness-105 text-foreground rounded-md text-xs font-semibold transition cursor-pointer"
                   >
-                    <Plus className="w-4 h-4" />
-                    <span>Add Custom Field</span>
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>Add Field</span>
                   </button>
                   
                   <button
                     onClick={handleSaveSchema}
-                    className="flex items-center gap-1 px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-semibold transition cursor-pointer"
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-primary hover:brightness-110 text-primary-foreground rounded-md text-xs font-semibold transition cursor-pointer"
                   >
-                    <Save className="w-4 h-4" />
+                    <Save className="w-3.5 h-3.5" />
                     <span>Save Schema</span>
                   </button>
                 </div>
               </div>
 
               {/* Dynamic Field Rows */}
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {fields.length === 0 ? (
-                  <div className="text-center py-12 text-slate-500 space-y-2">
-                    <Settings className="w-12 h-12 mx-auto text-slate-600 stroke-1" />
-                    <p className="font-medium text-sm">No custom fields defined yet.</p>
-                    <p className="text-xs">Add custom attributes like Expire Date, Batch No, or Strength to capture client-specific metrics.</p>
+                  <div className="text-center py-12 text-muted-foreground space-y-2">
+                    <Settings className="w-10 h-10 mx-auto text-muted-foreground/30 stroke-1" />
+                    <p className="font-semibold text-xs text-foreground">No custom fields defined yet.</p>
+                    <p className="text-[10px] max-w-sm mx-auto text-muted-foreground">Add custom attributes like Expire Date, Batch No, or Strength to capture client-specific metrics.</p>
                   </div>
                 ) : (
                   fields.map((field, idx) => (
-                    <div key={idx} className="p-4 rounded-xl bg-slate-950 border border-slate-800 flex flex-col md:flex-row gap-4 items-start md:items-center">
+                    <div key={idx} className="p-3.5 rounded-md bg-background border border-border flex flex-col md:flex-row gap-4 items-start md:items-center">
                       
                       {/* Drag / Sort position controllers */}
                       <div className="flex md:flex-col gap-1 items-center justify-center">
                         <button
                           onClick={() => handleMoveField(idx, 'up')}
                           disabled={idx === 0}
-                          className="p-1 text-slate-500 hover:text-slate-300 disabled:opacity-30"
+                          className="p-1 text-muted-foreground hover:text-foreground disabled:opacity-30 transition cursor-pointer"
                         >
-                          <MoveUp className="w-3.5 h-3.5" />
+                          <MoveUp className="w-3 h-3" />
                         </button>
-                        <span className="text-xs font-bold text-slate-600">{idx + 1}</span>
+                        <span className="text-[10px] font-bold text-muted-foreground">{idx + 1}</span>
                         <button
                           onClick={() => handleMoveField(idx, 'down')}
                           disabled={idx === fields.length - 1}
-                          className="p-1 text-slate-500 hover:text-slate-300 disabled:opacity-30"
+                          className="p-1 text-muted-foreground hover:text-foreground disabled:opacity-30 transition cursor-pointer"
                         >
-                          <MoveDown className="w-3.5 h-3.5" />
+                          <MoveDown className="w-3 h-3" />
                         </button>
                       </div>
 
                       {/* Attribute inputs */}
                       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 flex-1 w-full">
                         <div>
-                          <label className="block text-[10px] uppercase font-bold text-slate-500 mb-1">Field Label</label>
+                          <label className="block text-[9px] uppercase font-bold text-muted-foreground mb-1">Field Label</label>
                           <input
                             type="text"
                             required
                             placeholder="e.g. Expire Date"
-                            className="w-full bg-slate-900 border border-slate-800 rounded px-2.5 py-1.5 text-sm outline-none focus:border-blue-500"
+                            className="w-full bg-card border border-border rounded-md px-2.5 py-1 text-xs text-foreground outline-none focus:border-primary transition"
                             value={field.label}
                             onChange={(e) => handleFieldChange(idx, 'label', e.target.value)}
                           />
                         </div>
 
                         <div>
-                          <label className="block text-[10px] uppercase font-bold text-slate-500 mb-1">Field Type</label>
+                          <label className="block text-[9px] uppercase font-bold text-muted-foreground mb-1">Field Type</label>
                           <select
-                            className="w-full bg-slate-900 border border-slate-800 rounded px-2 py-1.5 text-sm outline-none focus:border-blue-500"
+                            className="w-full bg-card border border-border rounded-md px-2 py-1 text-xs text-foreground outline-none focus:border-primary transition"
                             value={field.fieldType}
                             onChange={(e) => handleFieldChange(idx, 'fieldType', e.target.value)}
                           >
@@ -432,14 +432,14 @@ function Categories() {
                         </div>
 
                         <div>
-                          <label className="block text-[10px] uppercase font-bold text-slate-500 mb-1">
+                          <label className="block text-[9px] uppercase font-bold text-muted-foreground mb-1">
                             {field.fieldType === 'DROPDOWN' ? 'Dropdown Options' : 'Suffix / Unit'}
                           </label>
                           {field.fieldType === 'DROPDOWN' ? (
                             <input
                               type="text"
                               placeholder="Red, Green, Blue"
-                              className="w-full bg-slate-900 border border-slate-800 rounded px-2.5 py-1.5 text-sm outline-none focus:border-blue-500"
+                              className="w-full bg-card border border-border rounded-md px-2.5 py-1 text-xs text-foreground outline-none focus:border-primary transition"
                               value={field.options.join(', ')}
                               onChange={(e) => handleFieldChange(idx, 'options', e.target.value)}
                             />
@@ -447,7 +447,7 @@ function Categories() {
                             <input
                               type="text"
                               placeholder="e.g. mg, ml, kg"
-                              className="w-full bg-slate-900 border border-slate-800 rounded px-2.5 py-1.5 text-sm outline-none focus:border-blue-500"
+                              className="w-full bg-card border border-border rounded-md px-2.5 py-1 text-xs text-foreground outline-none focus:border-primary transition"
                               value={field.unit}
                               disabled={field.fieldType === 'BOOLEAN' || field.fieldType === 'DATE'}
                               onChange={(e) => handleFieldChange(idx, 'unit', e.target.value)}
@@ -459,20 +459,20 @@ function Categories() {
                           <input
                             type="checkbox"
                             id={`req-${idx}`}
-                            className="w-4 h-4 rounded bg-slate-900 border border-slate-800 text-blue-600 focus:ring-0 cursor-pointer"
+                            className="w-3.5 h-3.5 rounded bg-card border-border text-primary focus:ring-0 cursor-pointer"
                             checked={field.isRequired}
                             onChange={(e) => handleFieldChange(idx, 'isRequired', e.target.checked)}
                           />
-                          <label htmlFor={`req-${idx}`} className="text-xs text-slate-400 cursor-pointer select-none">Mandatory</label>
+                          <label htmlFor={`req-${idx}`} className="text-xs text-muted-foreground cursor-pointer select-none">Mandatory</label>
                         </div>
                       </div>
 
                       {/* Remove Button */}
                       <button
                         onClick={() => handleRemoveFieldDef(idx)}
-                        className="p-2 text-slate-500 hover:text-red-400 rounded-lg border border-transparent hover:border-slate-800 transition md:mt-4"
+                        className="p-1.5 text-muted-foreground hover:text-red-500 rounded-md border border-transparent hover:border-border transition md:mt-4 cursor-pointer"
                       >
-                        <Trash2 className="w-4 h-4" />
+                        <Trash2 className="w-3.5 h-3.5" />
                       </button>
 
                     </div>
@@ -482,10 +482,10 @@ function Categories() {
 
             </div>
           ) : (
-            <div className="p-6 rounded-xl border border-slate-800 bg-slate-900/50 glass-panel h-full flex flex-col justify-center items-center text-slate-500 text-center">
-              <FolderPlus className="w-16 h-16 text-slate-700 stroke-1 mb-4" />
-              <h3 className="font-semibold text-slate-300">Select or Create a Category</h3>
-              <p className="text-xs max-w-sm mt-1">Pick a category from the left pane to manage its dynamic custom database properties and schemas.</p>
+            <div className="p-10 rounded-md border border-border bg-card shadow-sm h-full flex flex-col justify-center items-center text-muted-foreground text-center">
+              <FolderPlus className="w-12 h-12 text-muted-foreground/20 stroke-1 mb-3" />
+              <h3 className="font-semibold text-xs text-foreground">Select or Create a Category</h3>
+              <p className="text-[10px] max-w-sm mt-1">Pick a category from the left pane to manage its dynamic custom database properties and schemas.</p>
             </div>
           )}
         </div>
