@@ -177,16 +177,16 @@ function Dashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         
         {/* Low Stock list */}
-        <div className="p-6 rounded-xl border border-slate-800 bg-slate-900/50 glass-panel">
+        <div className="p-6 rounded-xl border border-border bg-card/50 glass-panel shadow-premium">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-base font-semibold text-slate-200">Critical Stock Warning List</h3>
-            <span className="text-xs bg-red-950 text-red-400 px-2 py-0.5 rounded border border-red-900 font-medium">
+            <h3 className="text-base font-semibold text-foreground">Critical Stock Warning List</h3>
+            <span className="text-xs bg-destructive/10 text-destructive px-2 py-0.5 rounded border border-destructive/20 font-medium">
               {lowStock.length} Warning
             </span>
           </div>
           <div className="overflow-x-auto">
-            <table className="w-full text-sm text-left text-slate-300">
-              <thead className="text-xs uppercase bg-slate-950/60 text-slate-400 border-b border-slate-800">
+            <table className="w-full text-sm text-left text-foreground">
+              <thead className="text-xs uppercase bg-muted/30 text-muted-foreground border-b border-border">
                 <tr>
                   <th className="px-4 py-3">Product</th>
                   <th className="px-4 py-3">Category</th>
@@ -194,22 +194,22 @@ function Dashboard() {
                   <th className="px-4 py-3 text-center">Min Threshold</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800/60">
+              <tbody className="divide-y divide-border/60">
                 {lowStock.length === 0 ? (
                   <tr>
-                    <td colSpan={4} className="px-4 py-8 text-center text-slate-500">No critical stock warnings.</td>
+                    <td colSpan={4} className="px-4 py-8 text-center text-muted-foreground/70">No critical stock warnings.</td>
                   </tr>
                 ) : (
                   lowStock.map((item) => (
-                    <tr key={item.id} className="hover:bg-slate-800/20">
-                      <td className="px-4 py-3 font-medium text-slate-200">
+                    <tr key={item.id} className="hover:bg-muted/20 transition-colors">
+                      <td className="px-4 py-3 font-medium text-foreground">
                         <Link to={`/products?search=${item.product.sku}`} className="hover:underline">
                           {item.product.name}
                         </Link>
                       </td>
-                      <td className="px-4 py-3">{item.product.category.name}</td>
-                      <td className="px-4 py-3 text-center font-bold text-red-400">{item.quantity}</td>
-                      <td className="px-4 py-3 text-center text-slate-500">{item.minStock}</td>
+                      <td className="px-4 py-3 text-muted-foreground">{item.product.category.name}</td>
+                      <td className="px-4 py-3 text-center font-bold text-destructive">{item.quantity}</td>
+                      <td className="px-4 py-3 text-center text-muted-foreground">{item.minStock}</td>
                     </tr>
                   ))
                 )}
@@ -219,17 +219,17 @@ function Dashboard() {
         </div>
 
         {/* Recent stock movements */}
-        <div className="p-6 rounded-xl border border-slate-800 bg-slate-900/50 glass-panel">
+        <div className="p-6 rounded-xl border border-border bg-card/50 glass-panel shadow-premium">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-base font-semibold text-slate-200">Recent Movements Audit Log</h3>
-            <Link to="/inventory" className="text-xs text-blue-400 hover:text-blue-300 flex items-center gap-1">
+            <h3 className="text-base font-semibold text-foreground">Recent Movements Audit Log</h3>
+            <Link to="/inventory" className="text-xs text-primary hover:text-primary/80 flex items-center gap-1">
               <History className="w-3.5 h-3.5" />
               <span>Full History</span>
             </Link>
           </div>
           <div className="overflow-x-auto">
-            <table className="w-full text-sm text-left text-slate-300">
-              <thead className="text-xs uppercase bg-slate-950/60 text-slate-400 border-b border-slate-800">
+            <table className="w-full text-sm text-left text-foreground">
+              <thead className="text-xs uppercase bg-muted/30 text-muted-foreground border-b border-border">
                 <tr>
                   <th className="px-4 py-3">Date</th>
                   <th className="px-4 py-3">Product</th>
@@ -237,28 +237,28 @@ function Dashboard() {
                   <th className="px-4 py-3 text-right">Qty</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800/60">
+              <tbody className="divide-y divide-border/60">
                 {recentMovements.length === 0 ? (
                   <tr>
-                    <td colSpan={4} className="px-4 py-8 text-center text-slate-500">No stock movements found.</td>
+                    <td colSpan={4} className="px-4 py-8 text-center text-muted-foreground/70">No stock movements found.</td>
                   </tr>
                 ) : (
                   recentMovements.map((mov) => (
-                    <tr key={mov.id} className="hover:bg-slate-800/20">
-                      <td className="px-4 py-3 text-slate-500 text-xs">
+                    <tr key={mov.id} className="hover:bg-muted/20 transition-colors">
+                      <td className="px-4 py-3 text-muted-foreground text-xs">
                         {new Date(mov.createdAt).toLocaleDateString()}
                       </td>
-                      <td className="px-4 py-3 text-slate-200 font-medium truncate max-w-[150px]">{mov.product.name}</td>
+                      <td className="px-4 py-3 text-foreground font-medium truncate max-w-[150px]">{mov.product.name}</td>
                       <td className="px-4 py-3 text-center">
-                        <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
-                          mov.type === 'IN' || mov.type === 'RETURN' ? 'bg-emerald-950 text-emerald-400 border border-emerald-900' :
-                          mov.type === 'OUT' || mov.type === 'SALE' ? 'bg-red-950 text-red-400 border border-red-900' :
-                          'bg-blue-950 text-blue-400 border border-blue-900'
+                        <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded border ${
+                          mov.type === 'IN' || mov.type === 'RETURN' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' :
+                          mov.type === 'OUT' || mov.type === 'SALE' ? 'bg-destructive/10 text-destructive border-destructive/20' :
+                          'bg-primary/10 text-primary border-primary/20'
                         }`}>
                           {mov.type}
                         </span>
                       </td>
-                      <td className={`px-4 py-3 text-right font-semibold ${mov.quantity > 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                      <td className={`px-4 py-3 text-right font-semibold ${mov.quantity > 0 ? 'text-emerald-500' : 'text-destructive'}`}>
                         {mov.quantity > 0 ? `+${mov.quantity}` : mov.quantity}
                       </td>
                     </tr>

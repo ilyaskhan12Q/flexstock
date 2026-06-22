@@ -162,12 +162,12 @@ function Inventory() {
       
       {/* Toast Alert Info Block */}
       {message && (
-        <div className="p-4 rounded-xl bg-slate-900 border border-slate-800 flex justify-between items-center text-sm">
-          <div className="flex items-center gap-2 text-slate-300">
-            <CheckCircle className="w-4 h-4 text-emerald-400" />
+        <div className="p-4 rounded-xl bg-card border border-border flex justify-between items-center text-sm glass-panel">
+          <div className="flex items-center gap-2 text-foreground">
+            <CheckCircle className="w-4 h-4 text-emerald-500" />
             <span>{message}</span>
           </div>
-          <button onClick={() => setMessage('')} className="text-xs font-semibold text-slate-500 hover:text-slate-300">Dismiss</button>
+          <button onClick={() => setMessage('')} className="text-xs font-semibold text-muted-foreground hover:text-foreground">Dismiss</button>
         </div>
       )}
 
@@ -175,21 +175,21 @@ function Inventory() {
         
         {/* Left Side: Stock transaction Quick Panel */}
         <div className="lg:col-span-1 space-y-6">
-          <div className="p-6 rounded-xl border border-slate-800 bg-slate-900/50 glass-panel">
-            <h3 className="text-base font-semibold text-slate-200 mb-4 flex items-center gap-2">
-              <ClipboardList className="w-5 h-5 text-blue-400" />
+          <div className="p-6 rounded-xl border border-border bg-card/40 glass-panel shadow-premium">
+            <h3 className="text-base font-semibold text-foreground mb-4 flex items-center gap-2">
+              <ClipboardList className="w-5 h-5 text-primary" />
               <span>Record Stock Transaction</span>
             </h3>
 
             <form onSubmit={handleCreateTransaction} className="space-y-4">
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Scan / Search Product</label>
+                <label className="label-text">Scan / Search Product</label>
                 <div className="relative mb-2">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-500" />
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground/60" />
                   <input
                     type="text"
                     placeholder="Scan barcode or type name..."
-                    className="w-full bg-slate-950 border border-slate-800 focus:border-blue-500 rounded-lg pl-9 pr-3 py-2 text-sm text-slate-100 placeholder-slate-600 outline-none"
+                    className="input-field-sm pl-9"
                     onChange={(e) => {
                       const val = e.target.value.trim().toLowerCase();
                       if (!val) return;
@@ -207,7 +207,7 @@ function Inventory() {
                 
                 <select
                   required
-                  className="w-full bg-slate-950 border border-slate-800 focus:border-blue-500 rounded-lg px-3 py-2 text-sm text-slate-100 outline-none mb-2"
+                  className="input-field-sm mb-2"
                   value={selectedProduct}
                   onChange={(e) => setSelectedProduct(e.target.value)}
                 >
@@ -223,15 +223,15 @@ function Inventory() {
                 if (!prod) return null;
                 const catColor = prod.category?.color || '#3B82F6';
                 return (
-                  <div className="p-3 rounded-lg bg-slate-950 border border-slate-800 flex items-center justify-between animate-fade-in">
+                  <div className="p-3 rounded-lg bg-card/60 border border-border flex items-center justify-between animate-fade-in">
                     <div>
                       <div className="flex items-center gap-2">
                         <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: catColor }} />
-                        <span className="font-bold text-slate-200 text-sm">{prod.name}</span>
+                        <span className="font-bold text-foreground text-sm">{prod.name}</span>
                       </div>
-                      <span className="text-xs font-mono text-slate-500 block mt-0.5">{prod.sku}</span>
+                      <span className="text-xs font-mono text-muted-foreground block mt-0.5">{prod.sku}</span>
                     </div>
-                    <span className="text-xs font-bold text-slate-400 bg-slate-900 border border-slate-800 px-2 py-0.5 rounded">
+                    <span className="text-xs font-bold text-muted-foreground bg-muted/50 border border-border px-2 py-0.5 rounded">
                       {prod.category?.name || 'No Category'}
                     </span>
                   </div>
@@ -240,12 +240,12 @@ function Inventory() {
 
               <div className="space-y-4">
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Action Type</label>
+                  <label className="label-text">Action Type</label>
                   <div className="grid grid-cols-2 gap-2">
                     <button
                       type="button"
                       onClick={() => setTxType('IN')}
-                      className={`flex items-center gap-2 px-3 py-2.5 rounded-lg border text-xs font-bold transition cursor-pointer ${txType === 'IN' ? 'bg-emerald-500/10 border-emerald-500 text-emerald-400' : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-slate-200'}`}
+                      className={`flex items-center gap-2 px-3 py-2 rounded-md border text-xs font-semibold transition cursor-pointer ${txType === 'IN' ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-500' : 'bg-background border-border text-muted-foreground hover:text-foreground hover:bg-muted/50'}`}
                     >
                       <ArrowUp className="w-4 h-4 text-emerald-500" />
                       <span>Stock IN</span>
@@ -253,7 +253,7 @@ function Inventory() {
                     <button
                       type="button"
                       onClick={() => setTxType('OUT')}
-                      className={`flex items-center gap-2 px-3 py-2.5 rounded-lg border text-xs font-bold transition cursor-pointer ${txType === 'OUT' ? 'bg-red-500/10 border-red-500 text-red-400' : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-slate-200'}`}
+                      className={`flex items-center gap-2 px-3 py-2 rounded-md border text-xs font-semibold transition cursor-pointer ${txType === 'OUT' ? 'bg-red-500/10 border-red-500/30 text-red-400' : 'bg-background border-border text-muted-foreground hover:text-foreground hover:bg-muted/50'}`}
                     >
                       <ArrowDown className="w-4 h-4 text-red-500" />
                       <span>Stock OUT</span>
@@ -261,7 +261,7 @@ function Inventory() {
                     <button
                       type="button"
                       onClick={() => setTxType('ADJUSTMENT')}
-                      className={`flex items-center gap-2 px-3 py-2.5 rounded-lg border text-xs font-bold transition cursor-pointer ${txType === 'ADJUSTMENT' ? 'bg-amber-500/10 border-amber-500 text-amber-400' : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-slate-200'}`}
+                      className={`flex items-center gap-2 px-3 py-2 rounded-md border text-xs font-semibold transition cursor-pointer ${txType === 'ADJUSTMENT' ? 'bg-amber-500/10 border-amber-500/30 text-amber-500' : 'bg-background border-border text-muted-foreground hover:text-foreground hover:bg-muted/50'}`}
                     >
                       <Settings2 className="w-4 h-4 text-amber-500" />
                       <span>Correct Count</span>
@@ -269,22 +269,22 @@ function Inventory() {
                     <button
                       type="button"
                       onClick={() => setTxType('TRANSFER')}
-                      className={`flex items-center gap-2 px-3 py-2.5 rounded-lg border text-xs font-bold transition cursor-pointer ${txType === 'TRANSFER' ? 'bg-blue-500/10 border-blue-500 text-blue-400' : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-slate-200'}`}
+                      className={`flex items-center gap-2 px-3 py-2 rounded-md border text-xs font-semibold transition cursor-pointer ${txType === 'TRANSFER' ? 'bg-primary/10 border-primary/30 text-primary' : 'bg-background border-border text-muted-foreground hover:text-foreground hover:bg-muted/50'}`}
                     >
-                      <ArrowRightLeft className="w-4 h-4 text-blue-500" />
+                      <ArrowRightLeft className="w-4 h-4 text-primary" />
                       <span>Transfer</span>
                     </button>
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Quantity</label>
+                  <label className="label-text">Quantity</label>
                   <input
                     type="number"
                     min="1"
                     required
                     placeholder="Count"
-                    className="w-full bg-slate-950 border border-slate-800 focus:border-blue-500 rounded-lg px-3 py-2 text-sm text-slate-100 outline-none font-bold"
+                    className="input-field-sm font-bold"
                     value={txQty}
                     onChange={(e) => setTxQty(e.target.value)}
                   />
@@ -293,9 +293,9 @@ function Inventory() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Origin Location</label>
+                  <label className="label-text">Origin Location</label>
                   <select
-                    className="w-full bg-slate-950 border border-slate-800 focus:border-blue-500 rounded-lg px-3 py-2 text-sm text-slate-100 outline-none"
+                    className="input-field-sm"
                     value={selectedLocationForm}
                     onChange={(e) => setSelectedLocationForm(e.target.value)}
                   >
@@ -307,10 +307,10 @@ function Inventory() {
 
                 {txType === 'TRANSFER' && (
                   <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Target Location</label>
+                    <label className="label-text text-primary">Target Location</label>
                     <select
                       required
-                      className="w-full bg-slate-950 border border-slate-800 focus:border-blue-500 rounded-lg px-3 py-2 text-sm text-slate-100 outline-none border-blue-600 animate-pulse"
+                      className="input-field-sm border-primary/50"
                       value={targetLocationForm}
                       onChange={(e) => setTargetLocationForm(e.target.value)}
                     >
@@ -325,11 +325,11 @@ function Inventory() {
 
               <div className="grid grid-cols-1 gap-4">
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Reference / PO #</label>
+                  <label className="label-text">Reference / PO #</label>
                   <input
                     type="text"
                     placeholder="e.g. PO-92832"
-                    className="w-full bg-slate-950 border border-slate-800 focus:border-blue-500 rounded-lg px-3 py-2 text-sm text-slate-100 outline-none"
+                    className="input-field-sm"
                     value={txRef}
                     onChange={(e) => setTxRef(e.target.value)}
                   />
@@ -337,11 +337,11 @@ function Inventory() {
               </div>
 
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Transaction Notes</label>
+                <label className="label-text">Transaction Notes</label>
                 <textarea
                   rows={2}
                   placeholder="Reason for adjustment/movement..."
-                  className="w-full bg-slate-950 border border-slate-800 focus:border-blue-500 rounded-lg px-3 py-2 text-sm text-slate-100 outline-none"
+                  className="input-field-sm py-2"
                   value={txNote}
                   onChange={(e) => setTxNote(e.target.value)}
                 />
@@ -349,7 +349,7 @@ function Inventory() {
 
               <button
                 type="submit"
-                className="w-full py-2.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold transition flex items-center justify-center gap-1.5 cursor-pointer"
+                className="w-full py-2.5 rounded-md bg-primary hover:bg-primary/90 text-primary-foreground text-sm font-semibold transition flex items-center justify-center gap-1.5 cursor-pointer shadow-premium"
               >
                 {txType === 'IN' ? <ArrowUp className="w-4 h-4" /> : txType === 'OUT' ? <ArrowDown className="w-4 h-4" /> : <ArrowRightLeft className="w-4 h-4" />}
                 <span>Record Movement</span>
@@ -362,20 +362,20 @@ function Inventory() {
         <div className="lg:col-span-2 space-y-6">
           
           {/* Filters header */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-between items-center bg-slate-900/40 p-4 border border-slate-800 rounded-xl glass-panel">
+          <div className="flex flex-col sm:flex-row gap-4 justify-between items-center bg-card/40 p-4 border border-border rounded-xl glass-panel shadow-premium">
             <div className="relative flex-1 w-full">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-500" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground/60" />
               <input
                 type="text"
                 placeholder="Search stock by product name or SKU..."
-                className="w-full bg-slate-950 border border-slate-800 rounded-lg pl-9 pr-4 py-2 text-sm text-slate-100 placeholder-slate-600 outline-none focus:border-blue-500"
+                className="input-field-sm pl-9"
                 value={search}
                 onChange={(e) => { setSearch(e.target.value); setPage(1); }}
               />
             </div>
             
             <select
-              className="bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-100 outline-none focus:border-blue-500 w-full sm:w-auto"
+              className="input-field-sm w-full sm:w-auto"
               value={selectedLocation}
               onChange={(e) => { setSelectedLocation(e.target.value); setPage(1); }}
             >
@@ -389,15 +389,15 @@ function Inventory() {
           {/* Grid listing stock */}
           {loading ? (
             <div className="flex items-center justify-center py-12">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500" />
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary" />
             </div>
           ) : (
-            <div className="p-6 rounded-xl border border-slate-800 bg-slate-900/50 glass-panel">
-              <h3 className="text-base font-semibold text-slate-200 mb-4">Stock Inventory Levels</h3>
+            <div className="p-6 rounded-xl border border-border bg-card/50 glass-panel shadow-premium">
+              <h3 className="text-base font-semibold text-foreground mb-4">Stock Inventory Levels</h3>
               
               <div className="overflow-x-auto">
-                <table className="w-full text-sm text-left text-slate-300">
-                  <thead className="text-xs uppercase bg-slate-950/60 text-slate-400 border-b border-slate-800">
+                <table className="w-full text-sm text-left text-foreground">
+                  <thead className="text-xs uppercase bg-muted/30 text-muted-foreground border-b border-border">
                     <tr>
                       <th className="px-4 py-3">Product Name</th>
                       <th className="px-4 py-3">SKU</th>
@@ -407,10 +407,10 @@ function Inventory() {
                       <th className="px-4 py-3 text-center">Status</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-800/60">
+                  <tbody className="divide-y divide-border/60">
                     {inventoryItems.length === 0 ? (
                       <tr>
-                        <td colSpan={6} className="px-4 py-8 text-center text-slate-500">No stock levels found matching filters.</td>
+                        <td colSpan={6} className="px-4 py-8 text-center text-muted-foreground">No stock levels found matching filters.</td>
                       </tr>
                     ) : (
                       inventoryItems.map((item) => {
@@ -419,20 +419,20 @@ function Inventory() {
                         const flashClass = flashingRows[item.id] || '';
 
                         return (
-                          <tr key={item.id} className={`hover:bg-slate-800/20 transition-all duration-300 ${flashClass}`}>
-                            <td className="px-4 py-3 font-semibold text-slate-100 flex items-center gap-2.5">
+                          <tr key={item.id} className={`hover:bg-muted/20 transition-all duration-300 ${flashClass}`}>
+                            <td className="px-4 py-3 font-semibold text-foreground flex items-center gap-2.5">
                               <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: item.product.category?.color || '#475569' }} title={item.product.category?.name || 'No Category'} />
                               <span>{item.product.name}</span>
                             </td>
-                            <td className="px-4 py-3 font-mono text-xs text-slate-400">{item.product.sku}</td>
-                            <td className="px-4 py-3 text-slate-400 font-medium">{item.location}</td>
-                            <td className="px-4 py-3 text-center font-extrabold text-slate-200">{item.quantity}</td>
-                            <td className="px-4 py-3 text-center text-slate-500">{item.minStock}</td>
+                            <td className="px-4 py-3 font-mono text-xs text-muted-foreground">{item.product.sku}</td>
+                            <td className="px-4 py-3 text-muted-foreground font-medium">{item.location}</td>
+                            <td className="px-4 py-3 text-center font-extrabold text-foreground">{item.quantity}</td>
+                            <td className="px-4 py-3 text-center text-muted-foreground/70">{item.minStock}</td>
                             <td className="px-4 py-3 text-center">
                               <span className={`text-[10px] font-bold px-2 py-0.5 rounded border inline-flex items-center gap-1 ${
-                                isOut ? 'bg-red-950 text-red-400 border-red-900' :
-                                isLow ? 'bg-yellow-950 text-yellow-400 border-yellow-900' :
-                                'bg-emerald-950 text-emerald-400 border-emerald-900'
+                                isOut ? 'bg-destructive/10 text-destructive border-destructive/20' :
+                                isLow ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' :
+                                'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'
                               }`}>
                                 <span>{isOut ? '🛑' : isLow ? '⚠️' : '✅'}</span>
                                 <span>{isOut ? 'Out of Stock' : isLow ? 'Low Stock' : 'In Stock'}</span>
@@ -448,20 +448,20 @@ function Inventory() {
 
               {/* Pagination Controls */}
               {pagination.pages > 1 && (
-                <div className="flex justify-between items-center mt-6 border-t border-slate-800 pt-4 text-sm">
-                  <span className="text-slate-500">Showing page {pagination.page} of {pagination.pages}</span>
+                <div className="flex justify-between items-center mt-6 border-t border-border pt-4 text-sm">
+                  <span className="text-muted-foreground">Showing page {pagination.page} of {pagination.pages}</span>
                   <div className="flex gap-2">
                     <button
                       disabled={pagination.page === 1}
                       onClick={() => setPage(pagination.page - 1)}
-                      className="px-3 py-1 bg-slate-800 border border-slate-700 hover:bg-slate-700 rounded text-xs font-semibold disabled:opacity-40"
+                      className="px-3 py-1 bg-secondary border border-border hover:bg-secondary/80 rounded text-xs font-semibold disabled:opacity-40 transition-colors"
                     >
                       Prev
                     </button>
                     <button
                       disabled={pagination.page === pagination.pages}
                       onClick={() => setPage(pagination.page + 1)}
-                      className="px-3 py-1 bg-slate-800 border border-slate-700 hover:bg-slate-700 rounded text-xs font-semibold disabled:opacity-40"
+                      className="px-3 py-1 bg-secondary border border-border hover:bg-secondary/80 rounded text-xs font-semibold disabled:opacity-40 transition-colors"
                     >
                       Next
                     </button>
@@ -472,15 +472,15 @@ function Inventory() {
           )}
 
           {/* Audit History Log Block */}
-          <div className="p-6 rounded-xl border border-slate-800 bg-slate-900/50 glass-panel">
-            <h3 className="text-base font-semibold text-slate-200 mb-4 flex items-center gap-2">
-              <Clock className="w-5 h-5 text-slate-400" />
+          <div className="p-6 rounded-xl border border-border bg-card/50 glass-panel shadow-premium">
+            <h3 className="text-base font-semibold text-foreground mb-4 flex items-center gap-2">
+              <Clock className="w-5 h-5 text-muted-foreground" />
               <span>Full Transaction Audit Log</span>
             </h3>
             
             <div className="overflow-x-auto">
-              <table className="w-full text-sm text-left text-slate-300">
-                <thead className="text-xs uppercase bg-slate-950/60 text-slate-400 border-b border-slate-800">
+              <table className="w-full text-sm text-left text-foreground">
+                <thead className="text-xs uppercase bg-muted/30 text-muted-foreground border-b border-border">
                   <tr>
                     <th className="px-4 py-2">Timestamp</th>
                     <th className="px-4 py-2">Product</th>
@@ -491,31 +491,31 @@ function Inventory() {
                     <th className="px-4 py-2">PO Ref</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-800/60 text-xs">
+                <tbody className="divide-y divide-border/60 text-xs">
                   {movements.length === 0 ? (
                     <tr>
-                      <td colSpan={7} className="px-4 py-6 text-center text-slate-500">No logs found.</td>
+                      <td colSpan={7} className="px-4 py-6 text-center text-muted-foreground">No logs found.</td>
                     </tr>
                   ) : (
                     movements.map((mov) => (
-                      <tr key={mov.id} className="hover:bg-slate-800/20">
-                        <td className="px-4 py-2 text-slate-500">{new Date(mov.createdAt).toLocaleString()}</td>
-                        <td className="px-4 py-2 font-medium text-slate-200">{mov.product.name}</td>
-                        <td className="px-4 py-2 text-slate-400">{mov.location}</td>
+                      <tr key={mov.id} className="hover:bg-muted/20 transition-colors">
+                        <td className="px-4 py-2 text-muted-foreground/70">{new Date(mov.createdAt).toLocaleString()}</td>
+                        <td className="px-4 py-2 font-medium text-foreground">{mov.product.name}</td>
+                        <td className="px-4 py-2 text-muted-foreground">{mov.location}</td>
                         <td className="px-4 py-2 text-center">
                           <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${
-                            mov.type === 'IN' || mov.type === 'RETURN' ? 'bg-emerald-950 text-emerald-400 border border-emerald-900' :
-                            mov.type === 'OUT' || mov.type === 'SALE' ? 'bg-red-950 text-red-400 border border-red-900' :
-                            'bg-blue-950 text-blue-400 border border-blue-900'
+                            mov.type === 'IN' || mov.type === 'RETURN' ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' :
+                            mov.type === 'OUT' || mov.type === 'SALE' ? 'bg-destructive/10 text-destructive border-destructive/20' :
+                            'bg-primary/10 text-primary border border-primary/20'
                           }`}>
                             {mov.type}
                           </span>
                         </td>
-                        <td className={`px-4 py-2 text-right font-bold ${mov.quantity > 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                        <td className={`px-4 py-2 text-right font-bold ${mov.quantity > 0 ? 'text-emerald-500' : 'text-destructive'}`}>
                           {mov.quantity > 0 ? `+${mov.quantity}` : mov.quantity}
                         </td>
-                        <td className="px-4 py-2 text-slate-400 truncate max-w-[80px]">{mov.user.name}</td>
-                        <td className="px-4 py-2 text-slate-500 font-mono">{mov.reference || '-'}</td>
+                        <td className="px-4 py-2 text-muted-foreground truncate max-w-[80px]">{mov.user.name}</td>
+                        <td className="px-4 py-2 text-muted-foreground/60 font-mono">{mov.reference || '-'}</td>
                       </tr>
                     ))
                   )}
@@ -525,20 +525,20 @@ function Inventory() {
 
             {/* History Pagination */}
             {movPagination.pages > 1 && (
-              <div className="flex justify-between items-center mt-4 border-t border-slate-800 pt-3 text-xs">
-                <span className="text-slate-500">Page {movPagination.page} of {movPagination.pages}</span>
+              <div className="flex justify-between items-center mt-4 border-t border-border pt-3 text-xs">
+                <span className="text-muted-foreground">Page {movPagination.page} of {movPagination.pages}</span>
                 <div className="flex gap-2">
                   <button
                     disabled={movPagination.page === 1}
                     onClick={() => setMovPage(movPagination.page - 1)}
-                    className="px-2 py-0.5 bg-slate-800 border border-slate-700 hover:bg-slate-700 rounded disabled:opacity-40"
+                    className="px-2 py-0.5 bg-secondary border border-border hover:bg-secondary/80 rounded disabled:opacity-40 transition-colors"
                   >
                     Prev
                   </button>
                   <button
                     disabled={movPagination.page === movPagination.pages}
                     onClick={() => setMovPage(movPagination.page + 1)}
-                    className="px-2 py-0.5 bg-slate-800 border border-slate-700 hover:bg-slate-700 rounded disabled:opacity-40"
+                    className="px-2 py-0.5 bg-secondary border border-border hover:bg-secondary/80 rounded disabled:opacity-40 transition-colors"
                   >
                     Next
                   </button>

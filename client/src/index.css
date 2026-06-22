@@ -4,67 +4,67 @@
 
 @layer base {
   :root {
-    --background: 224 71% 4%;
-    --foreground: 213 31% 91%;
+    --background: 240 33% 1%; /* Linear Canvas: #010102 */
+    --foreground: 180 6% 97%; /* Linear Ink: #f7f8f8 */
 
-    --muted: 223 47% 11%;
-    --muted-foreground: 215.4 16.3% 56.9%;
+    --muted: 210 6% 6%; /* Linear Surface-1: #0f1011 */
+    --muted-foreground: 220 6% 57%; /* Linear Ink-subtle: #8a8f98 */
 
-    --popover: 224 71% 4%;
-    --popover-foreground: 213 31% 91%;
+    --popover: 210 5% 8%; /* Linear Surface-2: #141516 */
+    --popover-foreground: 180 6% 97%;
 
-    --card: 224 71% 4%;
-    --card-foreground: 213 31% 91%;
+    --card: 210 6% 6%; /* Linear Surface-1: #0f1011 */
+    --card-foreground: 180 6% 97%;
 
-    --border: 216 34% 17%;
-    --input: 216 34% 17%;
+    --border: 223 9% 15%; /* Linear Hairline: #23252a */
+    --input: 223 9% 15%;
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 234 59% 60%; /* Linear Lavender-Blue: #5e6ad2 */
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 222.2 47.4% 11.2%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 210 5% 8%; /* Linear Surface-2: #141516 */
+    --secondary-foreground: 180 6% 97%;
 
-    --accent: 216 34% 17%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 210 4% 10%; /* Linear Surface-3: #18191a */
+    --accent-foreground: 180 6% 97%;
 
-    --destructive: 0 63% 31%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 72% 51%; /* Clean, bright red */
+    --destructive-foreground: 0 0% 100%;
 
-    --ring: 216 34% 17%;
+    --ring: 240 5% 22%; /* Linear Hairline Strong: #34343a */
 
-    --radius: 0.5rem;
+    --radius: 0.5rem; /* Linear md: 8px */
   }
 
   .light {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --background: 0 0% 100%; /* Linear Inverse Canvas: #ffffff */
+    --foreground: 210 6% 6%; /* Linear Inverse Ink: #0f1011 */
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 180 3% 96%; /* Linear Inverse Surface-1: #f5f6f6 */
+    --muted-foreground: 220 5% 41%; /* Linear Ink-tertiary: #62666d */
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover: 180 3% 97%; /* Linear Inverse Surface-2: #f6f7f7 */
+    --popover-foreground: 210 6% 6%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card: 180 3% 96%; /* Linear Inverse Surface-1: #f5f6f6 */
+    --card-foreground: 210 6% 6%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
+    --border: 220 13% 91%; /* Light gray border */
+    --input: 220 13% 91%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 234 59% 60%; /* Signature Lavender: #5e6ad2 */
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 180 3% 97%; /* Linear Inverse Surface-2: #f6f7f7 */
+    --secondary-foreground: 210 6% 6%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 220 13% 91%;
+    --accent-foreground: 210 6% 6%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
 
-    --ring: 215 20.2% 65.1%;
+    --ring: 234 59% 60%; /* Target ring light mode on primary */
   }
 }
 
@@ -75,49 +75,52 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    letter-spacing: -0.01em;
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 }
 
-/* Glassmorphism utility */
+/* Linear-style surface elevations */
 .glass-panel {
-  background: rgba(13, 20, 38, 0.45);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
 }
 
 .light .glass-panel {
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(0, 0, 0, 0.08);
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
 }
 
 .shadow-premium {
-  box-shadow: 0 4px 32px rgba(0, 0, 0, 0.4), 0 1px 0 rgba(255,255,255,0.04) inset;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
 .light .shadow-premium {
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05), 0 1px 0 rgba(0,0,0,0.02) inset;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03), inset 0 1px 0 rgba(0, 0, 0, 0.01);
 }
 
 .shadow-glass {
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 1px 0 rgba(255,255,255,0.06) inset;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
 .light .shadow-glass {
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.03), 0 1px 0 rgba(0,0,0,0.01) inset;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.03), inset 0 1px 0 rgba(0, 0, 0, 0.01);
 }
 
-/* Reusable form input field */
+/* Reusable form input field in Linear theme */
 .input-field {
-  @apply w-full bg-muted/40 border border-border focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-lg px-3 py-2 text-sm text-foreground outline-none transition placeholder-muted-foreground/60;
+  @apply w-full bg-background border border-border focus:border-primary focus:ring-1 focus:ring-primary rounded-md px-3 py-2 text-sm text-foreground outline-none transition placeholder-muted-foreground/50;
 }
 
-/* Reusable form label */
+/* Reusable small form input field in Linear theme */
+.input-field-sm {
+  @apply w-full bg-background border border-border focus:border-primary focus:ring-1 focus:ring-primary rounded-md px-3 py-1.5 text-xs text-foreground outline-none transition placeholder-muted-foreground/50;
+}
+
+/* Reusable form label in Linear theme */
 .label-text {
-  @apply block text-xs font-bold uppercase tracking-wider text-muted-foreground;
+  @apply block text-xs font-medium uppercase tracking-wider text-muted-foreground mb-1.5;
 }
 
 /* Bridge styling overrides to make hardcoded slate classes fully theme-responsive */
