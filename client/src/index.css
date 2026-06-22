@@ -113,6 +113,11 @@
   @apply w-full bg-background border border-border focus:border-primary focus:ring-1 focus:ring-primary rounded-md px-3 py-2 text-sm text-foreground outline-none transition placeholder-muted-foreground/50;
 }
 
+/* Reusable small form input field in Linear theme */
+.input-field-sm {
+  @apply w-full bg-background border border-border focus:border-primary focus:ring-1 focus:ring-primary rounded-md px-3 py-1.5 text-xs text-foreground outline-none transition placeholder-muted-foreground/50;
+}
+
 /* Reusable form label in Linear theme */
 .label-text {
   @apply block text-xs font-medium uppercase tracking-wider text-muted-foreground mb-1.5;

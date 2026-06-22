@@ -64,3 +64,13 @@ FlexStock implements an adaptive multi-tenant architecture:
 2. **Dynamic Attributes Config (`ProductField`)**: Belongs to a Category. Defines custom property validations (`isRequired`, `fieldType` like `NUMBER`, `DATE`, `DROPDOWN`, `BOOLEAN`, `TEXT`).
 3. **Product Entity (`Product`)**: Stores standard properties (SKU, name, prices, barcode). Custom fields are saved inside a JSON column (`customFields`), which is dynamically checked against `ProductField` schemas before database insertions and updates.
 4. **Movements & Stock (`Inventory` & `InventoryMovement`)**: Quantities are calculated on demand, updated instantly on checking transaction inputs, and broadcasted to cashiers via Socket.IO events (`stock:updated`, `alert:low-stock`).
+
+---
+
+## Styling & Design System Conventions
+
+FlexStock uses a premium **Linear-inspired design system** controlled by CSS custom variables in `client/src/index.css`:
+- **Theme Variables**: Styles use semantic names like `bg-background`, `bg-card`, `text-foreground`, `border-border`, and `bg-primary` for maximum theme responsiveness.
+- **Glassmorphism Panels**: UI cards and panels should use the `.glass-panel` and `.shadow-premium` helper classes for styling instead of raw background color properties.
+- **Input Fields & Forms**: Form inputs use the `.input-field` class (for standard fields) or `.input-field-sm` (for compact views), with corresponding labels using `.label-text`.
+- **Responsive Colors**: Do not hardcode slate or specific color values (`bg-slate-900`, `text-slate-200`) in new components; instead, leverage the custom variable utility wrappers to automatically support light/dark modes.

@@ -249,23 +249,23 @@ function Products() {
     <div className="space-y-5">
       
       {/* Top Action Bars */}
-      <div className="flex flex-col sm:flex-row gap-3.5 justify-between items-center bg-card p-4 border border-border rounded-md shadow-sm">
+      <div className="flex flex-col sm:flex-row gap-3.5 justify-between items-center bg-card/40 p-6 border border-border rounded-xl glass-panel shadow-premium">
         
         {/* Search & Category Filter */}
         <div className="flex flex-1 flex-col sm:flex-row gap-3 w-full">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground/60" />
             <input
               type="text"
               placeholder="Search by name, SKU or barcode..."
-              className="w-full bg-background border border-border rounded-md pl-9 pr-4 py-1.5 text-xs text-foreground placeholder-muted-foreground/50 outline-none focus:border-primary focus:ring-1 focus:ring-primary transition"
+              className="input-field-sm pl-9"
               value={search}
               onChange={(e) => { setSearch(e.target.value); setPage(1); }}
             />
           </div>
 
           <select
-            className="bg-background border border-border rounded-md px-3 py-1.5 text-xs text-foreground outline-none focus:border-primary focus:ring-1 focus:ring-primary transition"
+            className="input-field-sm"
             value={selectedCategoryFilter}
             onChange={(e) => { setSelectedCategoryFilter(e.target.value); setPage(1); }}
           >
@@ -280,7 +280,7 @@ function Products() {
         <div className="flex gap-2 w-full sm:w-auto">
           <button
             onClick={() => setImportOpen(true)}
-            className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3 py-1.5 bg-secondary hover:brightness-105 border border-border text-foreground rounded-md text-xs font-semibold transition cursor-pointer"
+            className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3 py-1.5 bg-secondary hover:bg-secondary/80 border border-border text-foreground rounded-md text-xs font-semibold transition cursor-pointer shadow-premium"
           >
             <FileSpreadsheet className="w-4 h-4" />
             <span>CSV Import</span>
@@ -288,7 +288,7 @@ function Products() {
           
           <button
             onClick={handleOpenCreateForm}
-            className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3 py-1.5 bg-primary hover:brightness-110 text-primary-foreground rounded-md text-xs font-semibold transition cursor-pointer"
+            className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3 py-1.5 bg-primary hover:bg-primary/90 text-primary-foreground rounded-md text-xs font-semibold transition cursor-pointer shadow-premium"
           >
             <Plus className="w-4 h-4" />
             <span>Add Product</span>
@@ -303,61 +303,61 @@ function Products() {
           <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary" />
         </div>
       ) : (
-        <div className="p-5 rounded-md border border-border bg-card shadow-sm">
+        <div className="p-6 rounded-xl border border-border bg-card/50 glass-panel shadow-premium">
           <div className="overflow-x-auto">
             <table className="w-full text-xs text-left text-foreground">
-              <thead className="text-[10px] uppercase bg-muted/40 text-muted-foreground border-b border-border">
+              <thead className="text-xs uppercase bg-muted/30 text-muted-foreground border-b border-border">
                 <tr>
-                  <th className="px-4 py-2.5">Image</th>
-                  <th className="px-4 py-2.5">SKU / Barcode</th>
-                  <th className="px-4 py-2.5">Product Name</th>
-                  <th className="px-4 py-2.5">Category</th>
-                  <th className="px-4 py-2.5 text-right">Price</th>
-                  <th className="px-4 py-2.5 text-right">Cost</th>
-                  <th className="px-4 py-2.5 text-center">Attributes</th>
-                  <th className="px-4 py-2.5 text-right">Actions</th>
+                  <th className="px-4 py-3">Image</th>
+                  <th className="px-4 py-3">SKU / Barcode</th>
+                  <th className="px-4 py-3">Product Name</th>
+                  <th className="px-4 py-3">Category</th>
+                  <th className="px-4 py-3 text-right">Price</th>
+                  <th className="px-4 py-3 text-right">Cost</th>
+                  <th className="px-4 py-3 text-center">Attributes</th>
+                  <th className="px-4 py-3 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-border">
+              <tbody className="divide-y divide-border/60">
                 {products.length === 0 ? (
                   <tr>
                     <td colSpan={8} className="px-4 py-10 text-center text-muted-foreground">No products found in catalog.</td>
                   </tr>
                 ) : (
                   products.map((prod) => (
-                    <tr key={prod.id} className="hover:bg-muted/40 transition-colors">
-                      <td className="px-4 py-2.5">
+                    <tr key={prod.id} className="hover:bg-muted/20 transition-colors">
+                      <td className="px-4 py-3">
                         {prod.imageUrl ? (
                           <img src={`http://localhost:3000${prod.imageUrl}`} alt={prod.name} className="w-8 h-8 object-cover rounded border border-border" />
                         ) : (
-                          <div className="w-8 h-8 bg-muted border border-border rounded flex items-center justify-center text-muted-foreground">
+                          <div className="w-8 h-8 bg-muted border border-border rounded flex items-center justify-center text-muted-foreground/60">
                             <Package className="w-4 h-4" />
                           </div>
                         )}
                       </td>
-                      <td className="px-4 py-2.5">
+                      <td className="px-4 py-3">
                         <div className="font-mono text-xs text-foreground font-medium">{prod.sku}</div>
                         <div className="text-[10px] text-muted-foreground">{prod.barcodeValue}</div>
                       </td>
-                      <td className="px-4 py-2.5 font-semibold text-foreground">{prod.name}</td>
-                      <td className="px-4 py-2.5 text-muted-foreground">{prod.category?.name}</td>
-                      <td className="px-4 py-2.5 text-right text-emerald-500 font-bold">{currencySymbol} {parseFloat(prod.price || 0).toFixed(2)}</td>
-                      <td className="px-4 py-2.5 text-right text-muted-foreground">{currencySymbol} {parseFloat(prod.costPrice || 0).toFixed(2)}</td>
-                      <td className="px-4 py-2.5">
+                      <td className="px-4 py-3 font-semibold text-foreground">{prod.name}</td>
+                      <td className="px-4 py-3 text-muted-foreground">{prod.category?.name}</td>
+                      <td className="px-4 py-3 text-right text-emerald-500 font-bold">{currencySymbol} {parseFloat(prod.price || 0).toFixed(2)}</td>
+                      <td className="px-4 py-3 text-right text-muted-foreground">{currencySymbol} {parseFloat(prod.costPrice || 0).toFixed(2)}</td>
+                      <td className="px-4 py-3">
                         {/* Dynamic Custom Fields attributes preview tags */}
                         <div className="flex flex-wrap gap-1 justify-center max-w-[200px] mx-auto">
                           {Object.entries(prod.customFields || {}).map(([key, val]) => (
-                            <span key={key} className="text-[9px] bg-background border border-border px-1.5 py-0.5 rounded text-muted-foreground">
+                            <span key={key} className="text-[9px] bg-background border border-border px-1.5 py-0.5 rounded text-muted-foreground font-mono">
                               {key}: {val.toString()}
                             </span>
                           ))}
                         </div>
                       </td>
-                      <td className="px-4 py-2.5 text-right">
+                      <td className="px-4 py-3 text-right">
                         <div className="flex justify-end gap-1">
                           <button
                             onClick={() => handleOpenPrintModal(prod)}
-                            className="p-1.5 text-muted-foreground hover:text-emerald-500 hover:bg-muted rounded transition"
+                            className="p-1.5 text-muted-foreground hover:text-emerald-500 hover:bg-muted/50 rounded-md transition"
                             title="Print labels"
                           >
                             <Printer className="w-4 h-4" />
@@ -365,7 +365,7 @@ function Products() {
                           
                           <button
                             onClick={() => handleOpenEditForm(prod)}
-                            className="p-1.5 text-muted-foreground hover:text-primary hover:bg-muted rounded transition"
+                            className="p-1.5 text-muted-foreground hover:text-primary hover:bg-muted/50 rounded-md transition"
                             title="Edit details"
                           >
                             <Edit2 className="w-4 h-4" />
@@ -373,7 +373,7 @@ function Products() {
 
                           <button
                             onClick={() => handleDeleteProduct(prod.id)}
-                            className="p-1.5 text-muted-foreground hover:text-red-500 hover:bg-muted rounded transition"
+                            className="p-1.5 text-muted-foreground hover:text-red-500 hover:bg-muted/50 rounded-md transition"
                             title="Delete"
                           >
                             <Trash2 className="w-4 h-4" />
@@ -395,14 +395,14 @@ function Products() {
                 <button
                   disabled={pagination.page === 1}
                   onClick={() => setPage(pagination.page - 1)}
-                  className="px-3 py-1 bg-secondary border border-border hover:brightness-105 rounded text-xs font-semibold disabled:opacity-40 text-foreground transition"
+                  className="px-3 py-1 bg-secondary border border-border hover:bg-secondary/80 rounded text-xs font-semibold disabled:opacity-40 text-foreground transition-colors"
                 >
                   Prev
                 </button>
                 <button
                   disabled={pagination.page === pagination.pages}
                   onClick={() => setPage(pagination.page + 1)}
-                  className="px-3 py-1 bg-secondary border border-border hover:brightness-105 rounded text-xs font-semibold disabled:opacity-40 text-foreground transition"
+                  className="px-3 py-1 bg-secondary border border-border hover:bg-secondary/80 rounded text-xs font-semibold disabled:opacity-40 text-foreground transition-colors"
                 >
                   Next
                 </button>
@@ -414,9 +414,9 @@ function Products() {
 
       {/* CREATE / EDIT PRODUCT MODAL FORM */}
       {formOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-[2px]">
-          <div className="w-full max-w-2xl bg-card border border-border rounded-md p-6 shadow-premium max-h-[90vh] overflow-y-auto space-y-5">
-            <div className="flex justify-between items-center border-b border-border pb-3.5">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+          <div className="w-full max-w-2xl bg-card border border-border rounded-2xl p-6 shadow-glass max-h-[90vh] overflow-y-auto space-y-6">
+            <div className="flex justify-between items-center border-b border-border pb-4">
               <h2 className="text-base font-bold text-foreground">{selectedProduct ? 'Edit Product Details' : 'Add New Product'}</h2>
               <button onClick={() => setFormOpen(false)} className="text-muted-foreground hover:text-foreground transition cursor-pointer">
                 <X className="w-4.5 h-4.5" />
@@ -426,10 +426,10 @@ function Products() {
             <form onSubmit={handleSubmitForm} className="space-y-4">
               {/* Category Picker (locked on edit) */}
               <div>
-                <label className="block text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Category</label>
+                <label className="label-text">Category</label>
                 <select
                   disabled={!!selectedProduct}
-                  className="w-full bg-background border border-border focus:border-primary focus:ring-1 focus:ring-primary rounded-md px-3 py-1.5 text-xs text-foreground outline-none transition"
+                  className="input-field-sm"
                   value={formCategory}
                   onChange={(e) => setFormCategory(e.target.value)}
                   required
@@ -444,10 +444,10 @@ function Products() {
               {/* Grid 1: Basic Info */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Product Name</label>
+                  <label className="label-text">Product Name</label>
                   <input
                     type="text"
-                    className="w-full bg-background border border-border focus:border-primary focus:ring-1 focus:ring-primary rounded-md px-3 py-1.5 text-xs text-foreground outline-none transition"
+                    className="input-field-sm"
                     value={formName}
                     onChange={(e) => setFormName(e.target.value)}
                     required
@@ -455,10 +455,10 @@ function Products() {
                 </div>
 
                 <div>
-                  <label className="block text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">SKU (Leave blank to auto-generate)</label>
+                  <label className="label-text">SKU (Leave blank to auto-generate)</label>
                   <input
                     type="text"
-                    className="w-full bg-background border border-border focus:border-primary focus:ring-1 focus:ring-primary rounded-md px-3 py-1.5 text-xs text-foreground outline-none font-mono transition"
+                    className="input-field-sm font-mono"
                     value={formSku}
                     onChange={(e) => setFormSku(e.target.value)}
                     disabled={!!selectedProduct}
@@ -469,33 +469,33 @@ function Products() {
               {/* Grid 2: Pricing & Units */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Selling Price ({currencySymbol})</label>
+                  <label className="label-text">Selling Price ({currencySymbol})</label>
                   <input
                     type="number"
                     step="0.01"
-                    className="w-full bg-background border border-border focus:border-primary focus:ring-1 focus:ring-primary rounded-md px-3 py-1.5 text-xs text-foreground outline-none transition"
+                    className="input-field-sm"
                     value={formPrice}
                     onChange={(e) => setFormPrice(e.target.value)}
                   />
                 </div>
 
                 <div>
-                  <label className="block text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Cost Price ({currencySymbol})</label>
+                  <label className="label-text">Cost Price ({currencySymbol})</label>
                   <input
                     type="number"
                     step="0.01"
-                    className="w-full bg-background border border-border focus:border-primary focus:ring-1 focus:ring-primary rounded-md px-3 py-1.5 text-xs text-foreground outline-none transition"
+                    className="input-field-sm"
                     value={formCostPrice}
                     onChange={(e) => setFormCostPrice(e.target.value)}
                   />
                 </div>
 
                 <div>
-                  <label className="block text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Base Unit</label>
+                  <label className="label-text">Base Unit</label>
                   <input
                     type="text"
                     placeholder="pcs, box, pack"
-                    className="w-full bg-background border border-border focus:border-primary focus:ring-1 focus:ring-primary rounded-md px-3 py-1.5 text-xs text-foreground outline-none transition"
+                    className="input-field-sm"
                     value={formUnit}
                     onChange={(e) => setFormUnit(e.target.value)}
                   />
@@ -505,31 +505,31 @@ function Products() {
               {/* Grid 3: Barcode & Image Upload */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Barcode Value (EAN/UPC)</label>
+                  <label className="label-text">Barcode Value (EAN/UPC)</label>
                   <input
                     type="text"
-                    className="w-full bg-background border border-border focus:border-primary focus:ring-1 focus:ring-primary rounded-md px-3 py-1.5 text-xs text-foreground outline-none transition"
+                    className="input-field-sm"
                     value={formBarcode}
                     onChange={(e) => setFormBarcode(e.target.value)}
                   />
                 </div>
 
                 <div>
-                  <label className="block text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Product Photo</label>
+                  <label className="label-text">Product Photo</label>
                   <input
                     type="file"
                     accept="image/*"
-                    className="w-full bg-background border border-border rounded-md px-3 py-1 text-xs text-muted-foreground cursor-pointer transition"
+                    className="w-full bg-background border border-border rounded-md px-3 py-1 text-xs text-muted-foreground cursor-pointer transition focus:border-primary focus:ring-1 focus:ring-primary outline-none"
                     onChange={(e) => setFormImage(e.target.files[0])}
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Long Description</label>
+                <label className="label-text">Long Description</label>
                 <textarea
                   rows={2}
-                  className="w-full bg-background border border-border focus:border-primary focus:ring-1 focus:ring-primary rounded-md px-3 py-1.5 text-xs text-foreground outline-none transition"
+                  className="input-field-sm py-2 resize-none"
                   value={formDescription}
                   onChange={(e) => setFormDescription(e.target.value)}
                 />
@@ -537,8 +537,8 @@ function Products() {
 
               {/* DYNAMIC SCHEMA CUSTOM FIELDS FORM SECTION */}
               {currentCategorySchema.length > 0 && (
-                <div className="border-t border-border pt-3.5 space-y-3.5">
-                  <h3 className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Custom Attributes ({categories.find(c=>c.id === formCategory)?.name})</h3>
+                <div className="border-t border-border pt-4 space-y-4">
+                  <h3 className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/80">Custom Attributes ({categories.find(c=>c.id === formCategory)?.name})</h3>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {currentCategorySchema.map((field) => {
                       const inputKey = field.key;
@@ -546,15 +546,15 @@ function Products() {
                       
                       return (
                         <div key={field.id}>
-                          <label className="block text-xs font-medium text-foreground mb-1">
+                          <label className="block text-[11px] font-semibold text-foreground/90 mb-1.5">
                             {field.label} {field.isRequired && <span className="text-red-500">*</span>}
-                            {field.unit && <span className="text-[9px] text-muted-foreground ml-1">({field.unit})</span>}
+                            {field.unit && <span className="text-[9px] text-muted-foreground ml-1 font-normal">({field.unit})</span>}
                           </label>
 
                           {field.fieldType === 'DROPDOWN' ? (
                             <select
                               required={field.isRequired}
-                              className="w-full bg-background border border-border focus:border-primary focus:ring-1 focus:ring-primary rounded-md px-3 py-1.5 text-xs text-foreground outline-none transition"
+                              className="input-field-sm"
                               value={val}
                               onChange={(e) => handleDynamicFieldChange(inputKey, e.target.value, 'DROPDOWN')}
                             >
@@ -568,17 +568,17 @@ function Products() {
                               <input
                                 type="checkbox"
                                 id={`dynamic-${field.id}`}
-                                className="w-3.5 h-3.5 rounded bg-background border border-border text-primary focus:ring-0 cursor-pointer"
+                                className="w-4 h-4 rounded bg-background border border-border text-primary focus:ring-0 cursor-pointer transition-colors"
                                 checked={!!val}
                                 onChange={(e) => handleDynamicFieldChange(inputKey, e.target.checked, 'BOOLEAN')}
                               />
-                              <label htmlFor={`dynamic-${field.id}`} className="text-xs text-muted-foreground cursor-pointer">Yes</label>
+                              <label htmlFor={`dynamic-${field.id}`} className="text-xs text-muted-foreground cursor-pointer select-none">Yes</label>
                             </div>
                           ) : field.fieldType === 'TEXTAREA' ? (
                             <textarea
                               rows={2}
                               required={field.isRequired}
-                              className="w-full bg-background border border-border focus:border-primary focus:ring-1 focus:ring-primary rounded-md px-3 py-1.5 text-xs text-foreground outline-none transition"
+                              className="input-field-sm py-2 resize-none"
                               value={val}
                               onChange={(e) => handleDynamicFieldChange(inputKey, e.target.value, 'TEXTAREA')}
                             />
@@ -586,7 +586,7 @@ function Products() {
                             <input
                               type={field.fieldType === 'NUMBER' ? 'number' : field.fieldType === 'DATE' ? 'date' : 'text'}
                               required={field.isRequired}
-                              className="w-full bg-background border border-border focus:border-primary focus:ring-1 focus:ring-primary rounded-md px-3 py-1.5 text-xs text-foreground outline-none transition"
+                              className="input-field-sm"
                               value={val}
                               onChange={(e) => handleDynamicFieldChange(inputKey, e.target.value, field.fieldType)}
                             />
@@ -598,17 +598,17 @@ function Products() {
                 </div>
               )}
 
-              <div className="flex justify-end gap-2 pt-3.5 border-t border-border">
+              <div className="flex justify-end gap-2 pt-4 border-t border-border">
                 <button
                   type="button"
                   onClick={() => setFormOpen(false)}
-                  className="px-3.5 py-1.5 rounded-md bg-secondary border border-border hover:brightness-105 text-foreground text-xs font-semibold transition cursor-pointer"
+                  className="px-3.5 py-1.5 rounded-md bg-secondary border border-border hover:bg-secondary/80 text-foreground text-xs font-semibold transition cursor-pointer shadow-premium"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-3.5 py-1.5 rounded-md bg-primary hover:brightness-110 text-primary-foreground text-xs font-semibold transition cursor-pointer"
+                  className="px-3.5 py-1.5 rounded-md bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-semibold transition cursor-pointer shadow-premium"
                 >
                   Save Product
                 </button>
@@ -620,9 +620,9 @@ function Products() {
 
       {/* CSV IMPORT MODAL */}
       {importOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-[2px]">
-          <div className="w-full max-w-lg bg-card border border-border rounded-md p-6 shadow-premium space-y-5">
-            <div className="flex justify-between items-center border-b border-border pb-3.5">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+          <div className="w-full max-w-lg bg-card border border-border rounded-2xl p-6 shadow-glass space-y-6">
+            <div className="flex justify-between items-center border-b border-border pb-4">
               <h2 className="text-base font-bold text-foreground">CSV Bulk Import Products</h2>
               <button onClick={() => { setImportOpen(false); setImportResults(null); }} className="text-muted-foreground hover:text-foreground transition cursor-pointer">
                 <X className="w-4.5 h-4.5" />
@@ -631,29 +631,29 @@ function Products() {
 
             {!importResults ? (
               <form onSubmit={handleCsvImport} className="space-y-4">
-                <div className="p-8 border border-dashed border-border rounded-md flex flex-col items-center justify-center hover:border-primary/50 transition bg-background">
+                <div className="p-8 border border-dashed border-border rounded-xl flex flex-col items-center justify-center hover:border-primary/50 transition bg-background">
                   <Upload className="w-8 h-8 text-muted-foreground/60 mb-2" />
                   <input
                     type="file"
                     accept=".csv"
                     required
                     onChange={(e) => setCsvFile(e.target.files[0])}
-                    className="text-xs text-muted-foreground file:mr-3.5 file:py-1 file:px-3 file:rounded-md file:border file:border-border file:text-xs file:font-semibold file:bg-secondary file:text-foreground file:hover:brightness-105 cursor-pointer"
+                    className="text-xs text-muted-foreground file:mr-3.5 file:py-1 file:px-3 file:rounded-md file:border file:border-border file:text-xs file:font-semibold file:bg-secondary file:text-foreground file:hover:bg-secondary/85 cursor-pointer"
                   />
-                  <p className="text-[9px] text-muted-foreground mt-2">Required headers: categoryName, name. Optional: sku, price, costPrice, unit, barcodeValue.</p>
+                  <p className="text-[9px] text-muted-foreground mt-2 text-center">Required headers: categoryName, name. Optional: sku, price, costPrice, unit, barcodeValue.</p>
                 </div>
                 
                 <div className="flex justify-end gap-2">
                   <button
                     type="button"
                     onClick={() => setImportOpen(false)}
-                    className="px-3.5 py-1.5 rounded-md bg-secondary border border-border hover:brightness-105 text-foreground text-xs font-semibold transition"
+                    className="px-3.5 py-1.5 rounded-md bg-secondary border border-border hover:bg-secondary/80 text-foreground text-xs font-semibold transition shadow-premium"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    className="px-3.5 py-1.5 rounded-md bg-primary hover:brightness-110 text-primary-foreground text-xs font-semibold transition cursor-pointer"
+                    className="px-3.5 py-1.5 rounded-md bg-primary hover:bg-primary/95 text-primary-foreground text-xs font-semibold transition cursor-pointer shadow-premium"
                   >
                     Start Import
                   </button>
@@ -681,7 +681,7 @@ function Products() {
                 
                 <button
                   onClick={() => { setImportOpen(false); setImportResults(null); }}
-                  className="w-full py-1.5 bg-secondary border border-border hover:brightness-105 text-foreground rounded-md text-xs font-semibold transition cursor-pointer"
+                  className="w-full py-1.5 bg-secondary border border-border hover:bg-secondary/80 text-foreground rounded-md text-xs font-semibold transition cursor-pointer shadow-premium"
                 >
                   Close Window
                 </button>
@@ -693,9 +693,9 @@ function Products() {
 
       {/* PRINT BARCODE LABELS CONFIG MODAL */}
       {labelOpen && selectedProduct && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-[2px]">
-          <div className="w-full max-w-md bg-card border border-border rounded-md p-6 shadow-premium space-y-5">
-            <div className="flex justify-between items-center border-b border-border pb-3.5">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+          <div className="w-full max-w-md bg-card border border-border rounded-2xl p-6 shadow-glass space-y-6">
+            <div className="flex justify-between items-center border-b border-border pb-4">
               <h2 className="text-base font-bold text-foreground">Print Product Labels</h2>
               <button onClick={() => setLabelOpen(false)} className="text-muted-foreground hover:text-foreground transition cursor-pointer">
                 <X className="w-4.5 h-4.5" />
@@ -704,27 +704,27 @@ function Products() {
 
             <div className="space-y-4">
               <div>
-                <label className="block text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Product Name</label>
-                <div className="p-3 bg-background border border-border rounded-md font-semibold text-foreground text-xs">
+                <label className="label-text">Product Name</label>
+                <div className="p-3 bg-background border border-border rounded-md font-semibold text-foreground text-xs shadow-inner">
                   {selectedProduct.name}
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Print Quantity</label>
+                  <label className="label-text">Print Quantity</label>
                   <input
                     type="number"
                     min="1"
-                    className="w-full bg-background border border-border focus:border-primary focus:ring-1 focus:ring-primary rounded-md px-3 py-1.5 text-xs text-foreground outline-none transition"
+                    className="input-field-sm"
                     value={printQty}
                     onChange={(e) => setPrintQty(e.target.value)}
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Label Sheet Template</label>
+                  <label className="label-text">Label Sheet Template</label>
                   <select
-                    className="w-full bg-background border border-border focus:border-primary focus:ring-1 focus:ring-primary rounded-md px-3 py-1.5 text-xs text-foreground outline-none transition"
+                    className="input-field-sm"
                     value={printTemplate}
                     onChange={(e) => setPrintTemplate(e.target.value)}
                   >
@@ -737,7 +737,7 @@ function Products() {
 
               <button
                 onClick={handleDownloadLabelsPDF}
-                className="w-full py-2 bg-primary hover:brightness-110 text-primary-foreground font-semibold rounded-md text-xs transition shadow-sm flex items-center justify-center gap-1.5 cursor-pointer"
+                className="w-full py-2 bg-primary hover:bg-primary/95 text-primary-foreground font-semibold rounded-md text-xs transition shadow-premium flex items-center justify-center gap-1.5 cursor-pointer"
               >
                 <Printer className="w-4 h-4" />
                 <span>Generate & Download PDF</span>

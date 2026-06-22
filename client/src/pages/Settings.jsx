@@ -7,7 +7,6 @@ import {
   ToggleLeft,
   ToggleRight,
   Download,
-  Upload,
   Plus,
   Trash2,
   Save,
@@ -25,8 +24,8 @@ function Toast({ type, message, onClose }) {
   }, [onClose]);
 
   return (
-    <div className={`fixed bottom-6 right-6 z-50 flex items-center gap-3 px-5 py-3 rounded-xl shadow-glass border text-sm font-semibold transition-all
-      ${type === 'success' ? 'bg-emerald-950 border-emerald-800 text-emerald-300' : 'bg-red-950 border-red-800 text-red-300'}`}>
+    <div className={`fixed bottom-6 right-6 z-50 flex items-center gap-3 px-5 py-3 rounded-xl shadow-glass border text-sm font-semibold transition-all glass-panel
+      ${type === 'success' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500' : 'bg-destructive/10 border-destructive/20 text-destructive'}`}>
       {type === 'success' ? <CheckCircle className="w-4 h-4" /> : <AlertTriangle className="w-4 h-4" />}
       {message}
     </div>
@@ -159,7 +158,7 @@ function Settings() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500" />
+        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary" />
       </div>
     );
   }
@@ -172,18 +171,18 @@ function Settings() {
       {/* Page header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-blue-950/40 border border-blue-900/60 rounded-lg">
-            <SettingsIcon className="w-5 h-5 text-blue-400" />
+          <div className="p-2 bg-primary/10 border border-primary/20 rounded-lg">
+            <SettingsIcon className="w-5 h-5 text-primary" />
           </div>
           <div>
-            <h1 className="text-xl font-bold text-slate-100">System Settings</h1>
-            <p className="text-xs text-slate-500 mt-0.5">Configure business details, locations, and module toggles</p>
+            <h1 className="text-xl font-bold text-foreground">System Settings</h1>
+            <p className="text-xs text-muted-foreground mt-1">Configure business details, locations, and module toggles</p>
           </div>
         </div>
         <button
           onClick={handleSave}
           disabled={saving}
-          className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white rounded-lg text-sm font-semibold transition shadow-premium disabled:opacity-50"
+          className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary/95 text-primary-foreground rounded-md text-sm font-semibold transition shadow-premium disabled:opacity-50 cursor-pointer"
         >
           <Save className="w-4 h-4" />
           {saving ? 'Saving...' : 'Save Settings'}
@@ -191,7 +190,7 @@ function Settings() {
       </div>
 
       {/* ── Business Information ──────────────────────────── */}
-      <Section icon={<Building2 className="w-4 h-4 text-emerald-400" />} title="Business Information"
+      <Section icon={<Building2 className="w-4 h-4 text-emerald-500" />} title="Business Information"
         desc="This information appears on all reports and PDF exports">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Field label="Business / Store Name">
@@ -238,23 +237,23 @@ function Settings() {
         {/* Logo Upload */}
         <div className="mt-4">
           <label className="label-text">Business Logo</label>
-          <div className="flex items-center gap-4 mt-1.5">
+          <div className="flex items-center gap-4 mt-2">
             {logoPreview ? (
-              <img src={logoPreview} alt="Logo" className="h-16 w-16 object-contain rounded-lg border border-slate-700 bg-slate-900 p-1" />
+              <img src={logoPreview} alt="Logo" className="h-16 w-16 object-contain rounded-lg border border-border bg-background p-1" />
             ) : (
-              <div className="h-16 w-16 rounded-lg border border-dashed border-slate-700 bg-slate-900 flex items-center justify-center">
-                <ImagePlus className="w-6 h-6 text-slate-600" />
+              <div className="h-16 w-16 rounded-lg border border-dashed border-border bg-background flex items-center justify-center">
+                <ImagePlus className="w-6 h-6 text-muted-foreground/40" />
               </div>
             )}
             <div>
               <button
                 type="button"
                 onClick={() => logoInputRef.current?.click()}
-                className="text-xs px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700 transition"
+                className="text-xs px-3 py-1.5 bg-secondary hover:bg-secondary/80 border border-border text-foreground rounded-md transition cursor-pointer"
               >
                 Upload Logo
               </button>
-              <p className="text-xs text-slate-500 mt-1">PNG/JPG, max 2MB. Used in PDF reports and labels.</p>
+              <p className="text-xs text-muted-foreground mt-1.5">PNG/JPG, max 2MB. Used in PDF reports and labels.</p>
               <input ref={logoInputRef} type="file" accept="image/*" className="hidden" onChange={handleLogoChange} />
             </div>
           </div>
@@ -270,28 +269,28 @@ function Settings() {
               value={settings.defaultMinStock ?? 5}
               onChange={e => handleChange('defaultMinStock', parseInt(e.target.value))}
             />
-            <p className="text-xs text-slate-500 mt-1">Applied automatically to new products when no threshold is set.</p>
+            <p className="text-xs text-muted-foreground mt-1.5">Applied automatically to new products when no threshold is set.</p>
           </Field>
         </div>
       </Section>
 
       {/* ── Locations ────────────────────────────────────── */}
-      <Section icon={<MapPin className="w-4 h-4 text-purple-400" />} title="Warehouse / Store Locations"
+      <Section icon={<MapPin className="w-4 h-4 text-primary" />} title="Warehouse / Store Locations"
         desc="Manage where stock is tracked. Each product's inventory is tracked per location.">
         <div className="space-y-2 mb-3">
           {(settings.locations || ['Main']).map(loc => (
-            <div key={loc} className="flex items-center justify-between px-4 py-2.5 rounded-lg bg-slate-950 border border-slate-800">
+            <div key={loc} className="flex items-center justify-between px-4 py-2.5 rounded-lg bg-background border border-border">
               <div className="flex items-center gap-2">
-                <MapPin className="w-3.5 h-3.5 text-slate-500" />
-                <span className="text-sm font-medium text-slate-300">{loc}</span>
+                <MapPin className="w-3.5 h-3.5 text-muted-foreground" />
+                <span className="text-sm font-medium text-foreground/90">{loc}</span>
                 {loc === 'Main' && (
-                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-blue-950 text-blue-400 border border-blue-900 font-bold">DEFAULT</span>
+                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-primary/10 text-primary border border-primary/20 font-bold">DEFAULT</span>
                 )}
               </div>
               {loc !== 'Main' && (
                 <button
                   onClick={() => handleRemoveLocation(loc)}
-                  className="p-1 text-slate-600 hover:text-red-400 rounded transition"
+                  className="p-1 text-muted-foreground hover:text-destructive rounded transition cursor-pointer"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
                 </button>
@@ -310,7 +309,7 @@ function Settings() {
           />
           <button
             onClick={handleAddLocation}
-            className="flex items-center gap-1.5 px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-sm font-semibold border border-slate-700 transition"
+            className="flex items-center gap-1.5 px-4 py-2 bg-secondary hover:bg-secondary/80 border border-border text-foreground rounded-md text-sm font-semibold transition cursor-pointer"
           >
             <Plus className="w-4 h-4" />
             Add
@@ -319,7 +318,7 @@ function Settings() {
       </Section>
 
       {/* ── Optional Modules ─────────────────────────────── */}
-      <Section icon={<ToggleRight className="w-4 h-4 text-amber-400" />} title="Optional Modules"
+      <Section icon={<ToggleRight className="w-4 h-4 text-amber-500" />} title="Optional Modules"
         desc="Enable or disable optional features for this deployment">
         <div className="space-y-3">
           <ModuleToggle
@@ -344,7 +343,7 @@ function Settings() {
       </Section>
 
       {/* ── Email Alerts (SMTP) ──────────────────────────── */}
-      <Section icon={<Mail className="w-4 h-4 text-blue-400" />} title="Email Alerts (Optional)"
+      <Section icon={<Mail className="w-4 h-4 text-primary" />} title="Email Alerts (Optional)"
         desc="Configure SMTP to receive low-stock digest emails. Leave blank to disable.">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Field label="SMTP Host">
@@ -366,16 +365,16 @@ function Settings() {
       </Section>
 
       {/* ── Backup & Security ────────────────────────────── */}
-      <Section icon={<ShieldCheck className="w-4 h-4 text-red-400" />} title="Data Backup"
+      <Section icon={<ShieldCheck className="w-4 h-4 text-destructive" />} title="Data Backup"
         desc="Export a full JSON backup of all your inventory data. Store it safely.">
         <button
           onClick={handleBackup}
-          className="flex items-center gap-2 px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg text-sm font-semibold border border-slate-700 transition"
+          className="flex items-center gap-2 px-4 py-2.5 bg-secondary hover:bg-secondary/80 border border-border text-foreground rounded-md text-sm font-semibold transition cursor-pointer shadow-premium"
         >
-          <Download className="w-4 h-4 text-emerald-400" />
+          <Download className="w-4 h-4 text-emerald-500" />
           Download Full Database Backup
         </button>
-        <p className="text-xs text-slate-500 mt-2">Downloads all users, products, categories, inventory, movements, and sales as a JSON file.</p>
+        <p className="text-xs text-muted-foreground mt-2">Downloads all users, products, categories, inventory, movements, and sales as a JSON file.</p>
       </Section>
 
     </div>
@@ -386,12 +385,12 @@ function Settings() {
 
 function Section({ icon, title, desc, children }) {
   return (
-    <div className="p-6 rounded-xl border border-slate-800 bg-slate-900/50 glass-panel space-y-4">
-      <div className="flex items-start gap-3 border-b border-slate-800 pb-4">
-        <div className="p-2 bg-slate-800/60 rounded-lg mt-0.5">{icon}</div>
+    <div className="p-6 rounded-xl border border-border bg-card/50 glass-panel space-y-4 shadow-premium">
+      <div className="flex items-start gap-3 border-b border-border pb-4">
+        <div className="p-2 bg-muted/60 rounded-lg mt-0.5">{icon}</div>
         <div>
-          <h2 className="text-sm font-bold text-slate-200">{title}</h2>
-          <p className="text-xs text-slate-500 mt-0.5">{desc}</p>
+          <h2 className="text-sm font-bold text-foreground">{title}</h2>
+          <p className="text-xs text-muted-foreground mt-1">{desc}</p>
         </div>
       </div>
       {children}
@@ -410,14 +409,14 @@ function Field({ label, children }) {
 
 function ModuleToggle({ label, desc, enabled, onToggle }) {
   return (
-    <div className="flex items-start justify-between gap-4 p-3 rounded-lg bg-slate-950 border border-slate-800">
+    <div className="flex items-start justify-between gap-4 p-3 rounded-lg bg-background border border-border">
       <div>
-        <p className="text-sm font-semibold text-slate-200">{label}</p>
-        <p className="text-xs text-slate-500 mt-0.5">{desc}</p>
+        <p className="text-sm font-semibold text-foreground">{label}</p>
+        <p className="text-xs text-muted-foreground mt-1">{desc}</p>
       </div>
       <button
         onClick={onToggle}
-        className={`flex-shrink-0 p-1 rounded-full transition ${enabled ? 'text-emerald-400' : 'text-slate-600'}`}
+        className={`flex-shrink-0 p-1 rounded-full transition cursor-pointer ${enabled ? 'text-emerald-500' : 'text-muted-foreground/60'}`}
       >
         {enabled ? <ToggleRight className="w-8 h-8" /> : <ToggleLeft className="w-8 h-8" />}
       </button>

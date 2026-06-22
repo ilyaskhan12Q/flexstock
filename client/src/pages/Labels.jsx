@@ -80,19 +80,19 @@ function Labels() {
       {/* Page Header */}
       <div className="flex items-start justify-between flex-wrap gap-4">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-amber-950/40 border border-amber-900/60 rounded-lg">
-            <Tag className="w-5 h-5 text-amber-400" />
+          <div className="p-2 bg-primary/10 border border-primary/20 rounded-xl shadow-premium">
+            <Tag className="w-5 h-5 text-primary" />
           </div>
           <div>
-            <h1 className="text-xl font-bold text-slate-100">Label & Barcode Printing</h1>
-            <p className="text-xs text-slate-500 mt-0.5">Select products, set label quantity, choose layout, and print</p>
+            <h1 className="text-xl font-bold text-foreground">Label & Barcode Printing</h1>
+            <p className="text-xs text-muted-foreground mt-0.5">Select products, set label quantity, choose layout, and print</p>
           </div>
         </div>
 
         {/* Print Controls */}
         <div className="flex items-center gap-3 flex-wrap">
           <select
-            className="bg-slate-900 border border-slate-700 text-slate-300 text-sm rounded-lg px-3 py-2 outline-none focus:border-blue-500"
+            className="input-field-sm w-auto h-9 cursor-pointer"
             value={template}
             onChange={e => setTemplate(e.target.value)}
           >
@@ -104,7 +104,7 @@ function Labels() {
           <button
             onClick={handleGeneratePDF}
             disabled={!selectedCount || generating}
-            className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white rounded-lg text-sm font-semibold transition disabled:opacity-40"
+            className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary/95 text-primary-foreground rounded-md text-xs font-semibold transition cursor-pointer shadow-premium disabled:opacity-40 disabled:cursor-not-allowed"
           >
             <Printer className="w-4 h-4" />
             {generating ? 'Generating...' : `Print ${totalLabels} Label${totalLabels !== 1 ? 's' : ''}`}
@@ -114,12 +114,12 @@ function Labels() {
 
       {/* Summary row */}
       {selectedCount > 0 && (
-        <div className="flex items-center gap-3 p-3 rounded-lg bg-amber-950/20 border border-amber-900/40 text-amber-300 text-sm">
+        <div className="flex items-center gap-3 p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 text-xs font-semibold shadow-premium">
           <CheckSquare className="w-4 h-4" />
           <span>{selectedCount} product{selectedCount !== 1 ? 's' : ''} selected — {totalLabels} total labels to print</span>
           <button
             onClick={() => setSelected({})}
-            className="ml-auto text-xs text-amber-500 hover:text-amber-300 underline"
+            className="ml-auto text-xs text-amber-500 hover:text-amber-600 dark:hover:text-amber-400 underline cursor-pointer"
           >
             Clear selection
           </button>
@@ -130,26 +130,26 @@ function Labels() {
 
         {/* Product Search & Selection */}
         <div className="lg:col-span-2 space-y-4">
-          <div className="p-6 rounded-xl border border-slate-800 bg-slate-900/50 glass-panel">
+          <div className="p-6 rounded-xl border border-border bg-card/40 glass-panel shadow-premium">
             <div className="flex items-center gap-3 mb-4">
               <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/60" />
                 <input
                   type="text"
                   placeholder="Search products by name, SKU..."
-                  className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2 pl-9 text-sm text-slate-100 placeholder-slate-600 outline-none focus:border-blue-500"
+                  className="input-field-sm pl-9 py-2 bg-background/50"
                   value={search}
                   onChange={e => setSearch(e.target.value)}
                 />
               </div>
             </div>
 
-            <div className="divide-y divide-slate-800/60">
+            <div className="divide-y divide-border">
               {loading && (
-                <div className="py-8 text-center text-slate-500 text-sm">Loading products...</div>
+                <div className="py-8 text-center text-muted-foreground text-xs">Loading products...</div>
               )}
               {!loading && products.length === 0 && (
-                <div className="py-8 text-center text-slate-500 text-sm">No products found.</div>
+                <div className="py-8 text-center text-muted-foreground text-xs">No products found.</div>
               )}
               {products.map(prod => {
                 const isSelected = !!selected[prod.id];
@@ -159,21 +159,21 @@ function Labels() {
                 return (
                   <div
                     key={prod.id}
-                    className={`py-3 flex items-center gap-4 cursor-pointer hover:bg-slate-800/20 rounded-lg px-2 transition ${isSelected ? 'bg-amber-950/10' : ''}`}
+                    className={`py-3 flex items-center gap-4 cursor-pointer hover:bg-secondary/40 rounded-lg px-2 transition ${isSelected ? 'bg-primary/5' : ''}`}
                   >
-                    <button onClick={() => toggleProduct(prod.id)} className="flex-shrink-0">
+                    <button onClick={() => toggleProduct(prod.id)} className="flex-shrink-0 cursor-pointer">
                       {isSelected
-                        ? <CheckSquare className="w-5 h-5 text-amber-400" />
-                        : <Square className="w-5 h-5 text-slate-600" />
+                        ? <CheckSquare className="w-5 h-5 text-primary" />
+                        : <Square className="w-5 h-5 text-muted-foreground/60" />
                       }
                     </button>
 
                     <div className="flex-1 min-w-0" onClick={() => toggleProduct(prod.id)}>
-                      <p className="text-sm font-semibold text-slate-200 truncate">{prod.name}</p>
-                      <p className="text-xs text-slate-500 font-mono">{prod.sku} · Stock: {mainStock} {prod.unit}</p>
+                      <p className="text-sm font-semibold text-foreground truncate">{prod.name}</p>
+                      <p className="text-xs text-muted-foreground font-mono">{prod.sku} · Stock: {mainStock} {prod.unit}</p>
                     </div>
 
-                    <div className="text-right text-sm font-bold text-emerald-400 min-w-[70px]">
+                    <div className="text-right text-sm font-bold text-foreground min-w-[70px]">
                       {currencySymbol} {parseFloat(prod.price || 0).toFixed(2)}
                     </div>
 
@@ -181,14 +181,14 @@ function Labels() {
                       <div className="flex items-center gap-1.5 flex-shrink-0">
                         <button
                           onClick={(e) => { e.stopPropagation(); updateQty(prod.id, -1); }}
-                          className="p-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300"
+                          className="p-1 rounded bg-secondary hover:bg-secondary/80 border border-border text-foreground cursor-pointer shadow-premium"
                         >
                           <Minus className="w-3 h-3" />
                         </button>
-                        <span className="w-8 text-center text-sm font-bold text-slate-200">{qty}</span>
+                        <span className="w-8 text-center text-sm font-bold text-foreground">{qty}</span>
                         <button
                           onClick={(e) => { e.stopPropagation(); updateQty(prod.id, 1); }}
-                          className="p-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300"
+                          className="p-1 rounded bg-secondary hover:bg-secondary/80 border border-border text-foreground cursor-pointer shadow-premium"
                         >
                           <Plus className="w-3 h-3" />
                         </button>
@@ -198,7 +198,7 @@ function Labels() {
                     <button
                       onClick={(e) => { e.stopPropagation(); handleBarcodePreview(prod); }}
                       title="Preview barcode"
-                      className="p-1.5 text-slate-600 hover:text-amber-400 rounded transition flex-shrink-0"
+                      className="p-1.5 text-muted-foreground hover:text-primary rounded transition flex-shrink-0 cursor-pointer"
                     >
                       <Download className="w-4 h-4" />
                     </button>
@@ -211,8 +211,8 @@ function Labels() {
 
         {/* Sidebar: Label Template Preview */}
         <div className="space-y-4">
-          <div className="p-6 rounded-xl border border-slate-800 bg-slate-900/50 glass-panel">
-            <h3 className="text-sm font-bold text-slate-200 mb-4">Label Layout Preview</h3>
+          <div className="p-6 rounded-xl border border-border bg-card/40 glass-panel shadow-premium">
+            <h3 className="text-sm font-bold text-foreground mb-4">Label Layout Preview</h3>
             <div className="bg-white rounded-lg p-4 aspect-[210/297] flex flex-col gap-2">
               {template === '2x4' && (
                 <div className="grid grid-cols-3 gap-1 h-full">
@@ -248,11 +248,11 @@ function Labels() {
                 </div>
               )}
             </div>
-            <p className="text-xs text-slate-500 mt-2 text-center">A4 paper label layout preview</p>
+            <p className="text-xs text-muted-foreground mt-2 text-center">A4 paper label layout preview</p>
           </div>
 
-          <div className="p-4 rounded-xl border border-slate-800 bg-slate-900/50 glass-panel text-xs text-slate-500 space-y-2">
-            <p className="font-semibold text-slate-400">How it works:</p>
+          <div className="p-4 rounded-xl border border-border bg-card/40 glass-panel shadow-premium text-xs text-muted-foreground space-y-2">
+            <p className="font-semibold text-foreground/90">How it works:</p>
             <ol className="space-y-1 list-decimal list-inside">
               <li>Select products using the checkboxes</li>
               <li>Set how many labels per product</li>

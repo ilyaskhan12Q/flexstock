@@ -197,7 +197,7 @@ function Categories() {
       
       {/* Toast Alert Info Block */}
       {message && (
-        <div className="p-3.5 rounded-md bg-secondary border border-border flex justify-between items-center text-xs shadow-sm">
+        <div className="p-4 rounded-xl bg-secondary/40 border border-border flex justify-between items-center text-xs shadow-premium glass-panel">
           <div className="flex items-center gap-2 text-foreground">
             <Info className="w-4 h-4 text-primary" />
             <span>{message}</span>
@@ -212,31 +212,31 @@ function Categories() {
         <div className="space-y-5 lg:col-span-1">
           
           {/* Create Category Form */}
-          <div className="p-5 rounded-md border border-border bg-card shadow-sm">
-            <h3 className="text-xs font-bold text-foreground mb-3.5 flex items-center gap-2 uppercase tracking-wider text-muted-foreground">
-              <FolderPlus className="w-4 h-4 text-primary" />
+          <div className="p-6 rounded-xl border border-border bg-card/40 glass-panel shadow-premium">
+            <h3 className="text-xs font-bold text-foreground mb-3.5 flex items-center gap-2 uppercase tracking-wider text-muted-foreground/80">
+              <FolderPlus className="w-4.5 h-4.5 text-primary" />
               <span>{editingCatId ? 'Edit Category' : 'Create Category'}</span>
             </h3>
             
             <form onSubmit={handleAddCategory} className="space-y-4">
               <div>
-                <label className="block text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Category Name</label>
+                <label className="label-text">Category Name</label>
                 <input
                   type="text"
                   required
                   placeholder="e.g. Medicines, Electronics"
-                  className="w-full bg-background border border-border focus:border-primary focus:ring-1 focus:ring-primary rounded-md px-3 py-1.5 text-xs text-foreground placeholder-muted-foreground/50 outline-none transition"
+                  className="input-field-sm"
                   value={catName}
                   onChange={(e) => setCatName(e.target.value)}
                 />
               </div>
 
               <div>
-                <label className="block text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Description</label>
+                <label className="label-text">Description</label>
                 <textarea
                   placeholder="Describe what items fit here..."
                   rows={2}
-                  className="w-full bg-background border border-border focus:border-primary focus:ring-1 focus:ring-primary rounded-md px-3 py-1.5 text-xs text-foreground placeholder-muted-foreground/50 outline-none transition"
+                  className="input-field-sm py-2 resize-none"
                   value={catDesc}
                   onChange={(e) => setCatDesc(e.target.value)}
                 />
@@ -244,18 +244,18 @@ function Categories() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Theme Color</label>
+                  <label className="label-text">Theme Color</label>
                   <input
                     type="color"
-                    className="w-full bg-background border border-border rounded-md h-8 p-1 cursor-pointer transition"
+                    className="w-full bg-background border border-border rounded-md h-8 p-1 cursor-pointer transition focus:border-primary focus:ring-1 focus:ring-primary outline-none"
                     value={catColor}
                     onChange={(e) => setCatColor(e.target.value)}
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Icon Identifier</label>
+                  <label className="label-text">Icon Identifier</label>
                   <select
-                    className="w-full bg-background border border-border focus:border-primary focus:ring-1 focus:ring-primary rounded-md px-3 py-1.5 text-xs text-foreground outline-none transition"
+                    className="input-field-sm"
                     value={catIcon}
                     onChange={(e) => setCatIcon(e.target.value)}
                   >
@@ -272,7 +272,7 @@ function Categories() {
               <div className="flex gap-2 pt-1.5">
                 <button
                   type="submit"
-                  className="flex-1 py-1.5 rounded-md bg-primary hover:brightness-110 text-primary-foreground font-semibold text-xs transition cursor-pointer flex items-center justify-center gap-1.5"
+                  className="flex-1 py-1.5 rounded-md bg-primary hover:bg-primary/95 text-primary-foreground font-semibold text-xs transition cursor-pointer flex items-center justify-center gap-1.5 shadow-premium"
                 >
                   <Check className="w-4 h-4" />
                   <span>{editingCatId ? 'Save' : 'Create'}</span>
@@ -281,7 +281,7 @@ function Categories() {
                   <button
                     type="button"
                     onClick={() => { setEditingCatId(null); setCatName(''); setCatDesc(''); }}
-                    className="px-3 py-1.5 rounded-md bg-secondary border border-border hover:brightness-105 text-foreground text-xs font-semibold transition"
+                    className="px-3 py-1.5 rounded-md bg-secondary border border-border hover:bg-secondary/80 text-foreground text-xs font-semibold transition shadow-premium"
                   >
                     Cancel
                   </button>
@@ -291,8 +291,8 @@ function Categories() {
           </div>
 
           {/* Categories List */}
-          <div className="p-5 rounded-md border border-border bg-card shadow-sm">
-            <h3 className="text-xs font-bold text-foreground mb-3.5 uppercase tracking-wider text-muted-foreground">Categories</h3>
+          <div className="p-6 rounded-xl border border-border bg-card/40 glass-panel shadow-premium">
+            <h3 className="text-xs font-bold text-foreground mb-3.5 uppercase tracking-wider text-muted-foreground/80">Categories</h3>
             <div className="space-y-2">
               {categories.map((cat) => {
                 const isSelected = selectedCategory?.id === cat.id;
@@ -302,12 +302,12 @@ function Categories() {
                     onClick={() => handleSelectCategory(cat)}
                     className={`p-2.5 rounded-md border flex items-center justify-between cursor-pointer transition ${
                       isSelected 
-                        ? 'bg-secondary border-primary' 
-                        : 'bg-background border-border hover:border-muted-foreground/30'
+                        ? 'bg-secondary/60 border-primary' 
+                        : 'bg-background/40 border-border/80 hover:border-primary/50'
                     }`}
                   >
                     <div className="flex items-center gap-2.5">
-                      <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: cat.color || '#3b82f6' }} />
+                      <span className="w-2.5 h-2.5 rounded-full shadow-sm" style={{ backgroundColor: cat.color || '#3b82f6' }} />
                       <div>
                         <h4 className="font-semibold text-xs text-foreground">{cat.name}</h4>
                         <p className="text-[10px] text-muted-foreground">{cat.fields?.length || 0} custom fields</p>
@@ -317,13 +317,13 @@ function Categories() {
                     <div className="flex gap-1" onClick={(e) => e.stopPropagation()}>
                       <button
                         onClick={() => handleEditCategoryStart(cat)}
-                        className="p-1 text-muted-foreground hover:text-primary rounded transition"
+                        className="p-1.5 text-muted-foreground hover:text-primary hover:bg-muted/50 rounded transition-colors"
                       >
                         <Edit className="w-3.5 h-3.5" />
                       </button>
                       <button
                         onClick={() => handleDeleteCategory(cat.id)}
-                        className="p-1 text-muted-foreground hover:text-red-500 rounded transition"
+                        className="p-1.5 text-muted-foreground hover:text-red-500 hover:bg-muted/50 rounded transition-colors"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
@@ -339,13 +339,13 @@ function Categories() {
         {/* Right Side: dynamic Schema Custom Field Designer */}
         <div className="lg:col-span-2">
           {selectedCategory ? (
-            <div className="p-5 rounded-md border border-border bg-card shadow-sm space-y-5">
+            <div className="p-6 rounded-xl border border-border bg-card/50 glass-panel shadow-premium space-y-6">
               
               {/* Category Header metadata info */}
               <div className="flex justify-between items-start border-b border-border pb-4">
                 <div>
                   <div className="flex items-center gap-2.5">
-                    <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: selectedCategory.color || '#3b82f6' }} />
+                    <span className="w-2.5 h-2.5 rounded-full shadow-sm" style={{ backgroundColor: selectedCategory.color || '#3b82f6' }} />
                     <h2 className="text-sm font-bold text-foreground">{selectedCategory.name} Schema Designer</h2>
                   </div>
                   <p className="text-[10px] text-muted-foreground mt-1">{selectedCategory.description || 'No description provided.'}</p>
@@ -354,7 +354,7 @@ function Categories() {
                 <div className="flex gap-2">
                   <button
                     onClick={handleAddFieldDef}
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-secondary border border-border hover:brightness-105 text-foreground rounded-md text-xs font-semibold transition cursor-pointer"
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-secondary hover:bg-secondary/80 border border-border text-foreground rounded-md text-xs font-semibold transition cursor-pointer shadow-premium"
                   >
                     <Plus className="w-3.5 h-3.5" />
                     <span>Add Field</span>
@@ -362,7 +362,7 @@ function Categories() {
                   
                   <button
                     onClick={handleSaveSchema}
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-primary hover:brightness-110 text-primary-foreground rounded-md text-xs font-semibold transition cursor-pointer"
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-primary hover:bg-primary/95 text-primary-foreground rounded-md text-xs font-semibold transition cursor-pointer shadow-premium"
                   >
                     <Save className="w-3.5 h-3.5" />
                     <span>Save Schema</span>
@@ -380,7 +380,7 @@ function Categories() {
                   </div>
                 ) : (
                   fields.map((field, idx) => (
-                    <div key={idx} className="p-3.5 rounded-md bg-background border border-border flex flex-col md:flex-row gap-4 items-start md:items-center">
+                    <div key={idx} className="p-4 rounded-xl bg-background/50 border border-border/80 flex flex-col md:flex-row gap-4 items-start md:items-center shadow-premium">
                       
                       {/* Drag / Sort position controllers */}
                       <div className="flex md:flex-col gap-1 items-center justify-center">
@@ -404,21 +404,21 @@ function Categories() {
                       {/* Attribute inputs */}
                       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 flex-1 w-full">
                         <div>
-                          <label className="block text-[9px] uppercase font-bold text-muted-foreground mb-1">Field Label</label>
+                          <label className="label-text mb-1 block">Field Label</label>
                           <input
                             type="text"
                             required
                             placeholder="e.g. Expire Date"
-                            className="w-full bg-card border border-border rounded-md px-2.5 py-1 text-xs text-foreground outline-none focus:border-primary transition"
+                            className="input-field-sm"
                             value={field.label}
                             onChange={(e) => handleFieldChange(idx, 'label', e.target.value)}
                           />
                         </div>
 
                         <div>
-                          <label className="block text-[9px] uppercase font-bold text-muted-foreground mb-1">Field Type</label>
+                          <label className="label-text mb-1 block">Field Type</label>
                           <select
-                            className="w-full bg-card border border-border rounded-md px-2 py-1 text-xs text-foreground outline-none focus:border-primary transition"
+                            className="input-field-sm"
                             value={field.fieldType}
                             onChange={(e) => handleFieldChange(idx, 'fieldType', e.target.value)}
                           >
@@ -432,14 +432,14 @@ function Categories() {
                         </div>
 
                         <div>
-                          <label className="block text-[9px] uppercase font-bold text-muted-foreground mb-1">
+                          <label className="label-text mb-1 block">
                             {field.fieldType === 'DROPDOWN' ? 'Dropdown Options' : 'Suffix / Unit'}
                           </label>
                           {field.fieldType === 'DROPDOWN' ? (
                             <input
                               type="text"
                               placeholder="Red, Green, Blue"
-                              className="w-full bg-card border border-border rounded-md px-2.5 py-1 text-xs text-foreground outline-none focus:border-primary transition"
+                              className="input-field-sm"
                               value={field.options.join(', ')}
                               onChange={(e) => handleFieldChange(idx, 'options', e.target.value)}
                             />
@@ -447,7 +447,7 @@ function Categories() {
                             <input
                               type="text"
                               placeholder="e.g. mg, ml, kg"
-                              className="w-full bg-card border border-border rounded-md px-2.5 py-1 text-xs text-foreground outline-none focus:border-primary transition"
+                              className="input-field-sm"
                               value={field.unit}
                               disabled={field.fieldType === 'BOOLEAN' || field.fieldType === 'DATE'}
                               onChange={(e) => handleFieldChange(idx, 'unit', e.target.value)}
@@ -459,7 +459,7 @@ function Categories() {
                           <input
                             type="checkbox"
                             id={`req-${idx}`}
-                            className="w-3.5 h-3.5 rounded bg-card border-border text-primary focus:ring-0 cursor-pointer"
+                            className="w-3.5 h-3.5 rounded bg-background border-border text-primary focus:ring-0 cursor-pointer"
                             checked={field.isRequired}
                             onChange={(e) => handleFieldChange(idx, 'isRequired', e.target.checked)}
                           />
@@ -470,7 +470,7 @@ function Categories() {
                       {/* Remove Button */}
                       <button
                         onClick={() => handleRemoveFieldDef(idx)}
-                        className="p-1.5 text-muted-foreground hover:text-red-500 rounded-md border border-transparent hover:border-border transition md:mt-4 cursor-pointer"
+                        className="p-2 text-muted-foreground hover:text-red-500 rounded-md border border-border hover:bg-muted/50 transition md:mt-4 cursor-pointer"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
@@ -482,7 +482,7 @@ function Categories() {
 
             </div>
           ) : (
-            <div className="p-10 rounded-md border border-border bg-card shadow-sm h-full flex flex-col justify-center items-center text-muted-foreground text-center">
+            <div className="p-12 rounded-xl border border-border bg-card/50 glass-panel shadow-premium h-full flex flex-col justify-center items-center text-muted-foreground text-center">
               <FolderPlus className="w-12 h-12 text-muted-foreground/20 stroke-1 mb-3" />
               <h3 className="font-semibold text-xs text-foreground">Select or Create a Category</h3>
               <p className="text-[10px] max-w-sm mt-1">Pick a category from the left pane to manage its dynamic custom database properties and schemas.</p>
