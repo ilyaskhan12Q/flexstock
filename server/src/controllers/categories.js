@@ -1,4 +1,5 @@
 const prisma = require('../lib/prisma');
+const { recordAuditEvent, recordSecurityIncident } = require('../lib/audit');
 
 const getCategories = async (req, res, next) => {
   try {
@@ -76,6 +77,18 @@ const createCategory = async (req, res, next) => {
         where: { id: category.id },
         include: { fields: true }
       });
+    });
+
+    recordAuditEvent({
+      req,
+      actor: req.user,
+      action: 'create_category',
+      resourceType: 'category',
+      resourceId: result.id,
+      reason: 'Created category and field schema',
+      before: null,
+      after: result,
+      metadata: { fieldCount: result.fields?.length || 0 }
     });
 
     res.status(201).json(result);
@@ -161,6 +174,18 @@ const updateCategory = async (req, res, next) => {
       });
     });
 
+    recordAuditEvent({
+      req,
+      actor: req.user,
+      action: 'update_category',
+      resourceType: 'category',
+      resourceId: result.id,
+      reason: 'Updated category metadata or field schema',
+      before: category,
+      after: result,
+      metadata: { incomingFieldCount: fields.length }
+    });
+
     res.json(result);
   } catch (error) {
     next(error);
@@ -181,6 +206,16 @@ const deleteCategory = async (req, res, next) => {
     }
 
     if (category._count.products > 0) {
+      recordSecurityIncident({
+        req,
+        actor: req.user,
+        category: 'destructive_action_blocked',
+        action: 'delete_category_blocked',
+        resourceType: 'category',
+        resourceId: id,
+        reason: 'Attempted to delete a category that still contains products',
+        metadata: { productCount: category._count.products }
+      });
       return res.status(400).json({
         error: `Cannot delete category because it contains ${category._count.products} products.`
       });
@@ -189,6 +224,18 @@ const deleteCategory = async (req, res, next) => {
     await prisma.$transaction(async (tx) => {
       // ProductField cascade delete is handled by database onDelete: Cascade in prisma schema
       await tx.category.delete({ where: { id } });
+    });
+
+    recordAuditEvent({
+      req,
+      actor: req.user,
+      action: 'delete_category',
+      resourceType: 'category',
+      resourceId: id,
+      reason: 'Category deleted after verifying no products remained',
+      before: category,
+      after: { deleted: true },
+      metadata: { productCount: category._count.products }
     });
 
     res.json({ message: 'Category deleted successfully' });

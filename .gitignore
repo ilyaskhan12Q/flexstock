@@ -17,6 +17,8 @@ build/
 
 # Logs and databases
 *.log
+audit-logs/
+server/audit-logs/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*

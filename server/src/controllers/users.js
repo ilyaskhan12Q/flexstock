@@ -1,5 +1,6 @@
 const prisma = require('../lib/prisma');
 const bcrypt = require('bcrypt');
+const { recordAuditEvent, recordSecurityIncident } = require('../lib/audit');
 
 const getUsers = async (req, res, next) => {
   try {
@@ -53,6 +54,17 @@ const createUser = async (req, res, next) => {
       }
     });
 
+    recordAuditEvent({
+      req,
+      actor: req.user,
+      action: 'create_user',
+      resourceType: 'user',
+      resourceId: user.id,
+      reason: 'Created user account',
+      after: user,
+      metadata: { role }
+    });
+
     res.status(201).json(user);
   } catch (error) {
     next(error);
@@ -100,6 +112,18 @@ const updateUser = async (req, res, next) => {
       }
     });
 
+    recordAuditEvent({
+      req,
+      actor: req.user,
+      action: 'update_user',
+      resourceType: 'user',
+      resourceId: id,
+      reason: 'Updated user account',
+      before: user,
+      after: updated,
+      metadata: { changedEmail: email && email !== user.email, changedRole: role && role !== user.role, changedStatus: isActive !== undefined && isActive !== user.isActive }
+    });
+
     res.json(updated);
   } catch (error) {
     next(error);
@@ -117,6 +141,15 @@ const deleteUser = async (req, res, next) => {
 
     // Don't let users delete themselves
     if (req.user.id === id) {
+      recordSecurityIncident({
+        req,
+        actor: req.user,
+        category: 'destructive_action_blocked',
+        action: 'delete_user_blocked',
+        resourceType: 'user',
+        resourceId: id,
+        reason: 'User attempted to delete their own account'
+      });
       return res.status(400).json({ error: 'You cannot delete your own account.' });
     }
 
@@ -124,6 +157,18 @@ const deleteUser = async (req, res, next) => {
     await prisma.user.update({
       where: { id },
       data: { isActive: false }
+    });
+
+    recordAuditEvent({
+      req,
+      actor: req.user,
+      action: 'deactivate_user',
+      resourceType: 'user',
+      resourceId: id,
+      reason: 'Deactivated user account',
+      before: user,
+      after: { ...user, isActive: false },
+      metadata: { selfDeleteAttempt: req.user.id === id }
     });
 
     res.json({ message: 'User account deactivated successfully' });

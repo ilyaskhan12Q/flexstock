@@ -1,4 +1,5 @@
 const prisma = require('../lib/prisma');
+const { recordAuditEvent } = require('../lib/audit');
 
 const getInventory = async (req, res, next) => {
   try {
@@ -221,6 +222,24 @@ const createMovement = async (req, res, next) => {
         });
       }
     }
+
+    recordAuditEvent({
+      req,
+      actor: req.user,
+      action: 'record_stock_movement',
+      resourceType: 'inventory',
+      resourceId: result.movement.id,
+      reason: 'Stock movement recorded',
+      after: result.movement,
+      metadata: {
+        productId,
+        location,
+        targetLocation: targetLocation || null,
+        movementType: type,
+        quantity: qty,
+        newQuantity: result.newQuantity
+      }
+    });
 
     res.status(201).json({
       message: 'Stock movement recorded successfully',

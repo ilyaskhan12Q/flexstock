@@ -1,5 +1,6 @@
 const prisma = require('../lib/prisma');
 const crypto = require('crypto');
+const { recordAuditEvent } = require('../lib/audit');
 
 // Validate dynamic custom fields against category definition
 const validateCustomFields = async (categoryId, customFields = {}) => {
@@ -226,6 +227,21 @@ const createProduct = async (req, res, next) => {
       return prod;
     });
 
+    recordAuditEvent({
+      req,
+      actor: req.user,
+      action: 'create_product',
+      resourceType: 'product',
+      resourceId: product.id,
+      reason: 'Created product with initial inventory row',
+      after: product,
+      metadata: {
+        categoryId,
+        hasImage: !!req.file,
+        customFieldKeys: Object.keys(parsedFields || {})
+      }
+    });
+
     res.status(201).json(product);
   } catch (error) {
     next(error);
@@ -293,6 +309,21 @@ const updateProduct = async (req, res, next) => {
       data
     });
 
+    recordAuditEvent({
+      req,
+      actor: req.user,
+      action: 'update_product',
+      resourceType: 'product',
+      resourceId: id,
+      reason: 'Updated product metadata, pricing, or custom fields',
+      before: product,
+      after: updated,
+      metadata: {
+        hasImage: !!req.file,
+        updatedCustomFields: req.body.customFields ? Object.keys(parsedFields || {}) : []
+      }
+    });
+
     res.json(updated);
   } catch (error) {
     next(error);
@@ -312,6 +343,18 @@ const deleteProduct = async (req, res, next) => {
     await prisma.product.update({
       where: { id },
       data: { isActive: false }
+    });
+
+    recordAuditEvent({
+      req,
+      actor: req.user,
+      action: 'delete_product',
+      resourceType: 'product',
+      resourceId: id,
+      reason: 'Soft-deleted product',
+      before: product,
+      after: { isActive: false },
+      metadata: { sku: product.sku, categoryId: product.categoryId }
     });
 
     res.json({ message: 'Product deactivated successfully' });
@@ -424,6 +467,22 @@ const importProducts = async (req, res, next) => {
       message: `${results.length} products imported successfully`,
       successCount: results.length,
       errors
+    });
+
+    recordAuditEvent({
+      req,
+      actor: req.user,
+      action: 'bulk_import_products',
+      resourceType: 'product_import',
+      resourceId: null,
+      reason: 'Bulk CSV import completed',
+      outcome: errors.length > 0 ? 'partial_success' : 'success',
+      statusCode: 200,
+      metadata: {
+        importedCount: results.length,
+        errorCount: errors.length,
+        sourceFileName: req.file.originalname
+      }
     });
   } catch (error) {
     next(error);

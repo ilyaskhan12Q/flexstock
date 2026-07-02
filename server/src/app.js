@@ -4,6 +4,7 @@ const path = require('path');
 const dotenv = require('dotenv');
 const rateLimit = require('express-rate-limit');
 const { globalErrorHandler } = require('./middleware/errorHandler');
+const requestContext = require('./middleware/requestContext');
 
 dotenv.config({ path: path.join(__dirname, '../../.env') });
 
@@ -48,6 +49,8 @@ const labelsLimiter = rateLimit({
 });
 
 // ── Middlewares ────────────────────────────────────────────────
+app.use(requestContext);
+
 const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:3000',

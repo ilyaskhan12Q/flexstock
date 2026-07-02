@@ -1,4 +1,5 @@
 const prisma = require('../lib/prisma');
+const { recordAuditEvent } = require('../lib/audit');
 
 const getSales = async (req, res, next) => {
   try {
@@ -230,6 +231,21 @@ const createSale = async (req, res, next) => {
         itemCount: items.length
       });
     }
+
+    recordAuditEvent({
+      req,
+      actor: req.user,
+      action: 'create_sale',
+      resourceType: 'sale',
+      resourceId: result.sale.id,
+      reason: 'Sale checkout completed',
+      after: result.sale,
+      metadata: {
+        itemCount: items.length,
+        discount: discountVal,
+        total: result.sale.total
+      }
+    });
 
     res.status(201).json(result.sale);
   } catch (error) {

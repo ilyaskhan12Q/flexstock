@@ -2,6 +2,7 @@ const fs = require('fs');
 const path = require('path');
 
 const prisma = require('../lib/prisma');
+const { recordAuditEvent, recordSecurityIncident } = require('../lib/audit');
 
 // Settings are stored in a local JSON file (no DB model needed — single-tenant)
 const SETTINGS_PATH = path.join(__dirname, '../../../settings.json');
@@ -79,6 +80,22 @@ const updateSettings = async (req, res, next) => {
     // Return without smtp password
     const safe = { ...updated };
     if (safe.smtp) delete safe.smtp.password;
+
+    recordAuditEvent({
+      req,
+      actor: req.user,
+      action: 'update_settings',
+      resourceType: 'settings',
+      resourceId: 'global',
+      reason: 'Updated business settings',
+      before: current,
+      after: updated,
+      metadata: {
+        updatedKeys: Object.keys(req.body || {}),
+        hasLogoUpload: !!req.file
+      }
+    });
+
     res.json(safe);
   } catch (error) {
     next(error);
@@ -104,6 +121,7 @@ const addLocation = async (req, res, next) => {
     }
 
     const settings = readSettings();
+    const before = { locations: [...settings.locations] };
     const trimmed = name.trim();
 
     if (settings.locations.includes(trimmed)) {
@@ -112,6 +130,18 @@ const addLocation = async (req, res, next) => {
 
     settings.locations.push(trimmed);
     writeSettings(settings);
+
+    recordAuditEvent({
+      req,
+      actor: req.user,
+      action: 'add_location',
+      resourceType: 'settings_location',
+      resourceId: trimmed,
+      reason: 'Added inventory location',
+      before,
+      after: { locations: settings.locations },
+      metadata: { location: trimmed }
+    });
 
     res.status(201).json({ locations: settings.locations });
   } catch (error) {
@@ -131,12 +161,35 @@ const removeLocation = async (req, res, next) => {
     // Check if location has inventory
     const hasInventory = await prisma.inventory.findFirst({ where: { location: name } });
     if (hasInventory) {
+      recordSecurityIncident({
+        req,
+        actor: req.user,
+        category: 'destructive_action_blocked',
+        action: 'remove_location_blocked',
+        resourceType: 'settings_location',
+        resourceId: name,
+        reason: 'Attempted to remove a location with active inventory',
+        metadata: { location: name }
+      });
       return res.status(400).json({ error: `Location '${name}' has active inventory. Transfer stock first.` });
     }
 
     const settings = readSettings();
+    const before = { locations: [...settings.locations] };
     settings.locations = settings.locations.filter(l => l !== name);
     writeSettings(settings);
+
+    recordAuditEvent({
+      req,
+      actor: req.user,
+      action: 'remove_location',
+      resourceType: 'settings_location',
+      resourceId: name,
+      reason: 'Removed inventory location',
+      before,
+      after: { locations: settings.locations },
+      metadata: { location: name }
+    });
 
     res.json({ locations: settings.locations });
   } catch (error) {
@@ -162,6 +215,24 @@ const exportBackup = async (req, res, next) => {
       settings: readSettings(),
       data: { users, categories, products, inventory, movements, sales }
     };
+
+    recordAuditEvent({
+      req,
+      actor: req.user,
+      action: 'export_backup',
+      resourceType: 'backup',
+      resourceId: backup.exportedAt,
+      reason: 'Exported full system backup',
+      after: { exportedAt: backup.exportedAt, version: backup.version },
+      metadata: {
+        userCount: users.length,
+        categoryCount: categories.length,
+        productCount: products.length,
+        inventoryCount: inventory.length,
+        movementCount: movements.length,
+        saleCount: sales.length
+      }
+    });
 
     res.setHeader('Content-Type', 'application/json');
     res.setHeader('Content-Disposition', `attachment; filename="flexstock-backup-${Date.now()}.json"`);
