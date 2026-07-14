@@ -3,6 +3,7 @@ import API from '../api';
 import { useSocket } from '../hooks/useSocket';
 import { useFeedbackStore } from '../store/feedbackStore';
 import { useAuthStore } from '../store/authStore';
+import { useLanguageStore } from '../store/languageStore';
 import { 
   ClipboardList, 
   Search, 
@@ -17,6 +18,7 @@ import {
 } from 'lucide-react';
 
 function Inventory() {
+  const { t } = useLanguageStore();
   const [inventoryItems, setInventoryItems] = useState([]);
   const [movements, setMovements] = useState([]);
   const [pagination, setPagination] = useState({ total: 0, page: 1, limit: 10, pages: 1 });
@@ -149,13 +151,13 @@ function Inventory() {
         reference: txRef
       });
 
-      showSuccess('Transaction Successful', 'Stock transaction submitted successfully.');
+      showSuccess(t('stockTransactionSuccess'), t('stockTransactionSuccessMsg'));
       setTxQty('');
       setTxNote('');
       setTxRef('');
       fetchInventory();
     } catch (err) {
-      showError('Transaction Failed', err.response?.data?.error || err.message);
+      showError(t('error'), err.response?.data?.error || err.message);
     }
   };
 
@@ -180,7 +182,7 @@ function Inventory() {
           <div className="p-6 rounded-xl border border-border bg-card/40 glass-panel shadow-premium">
             <h3 className="text-base font-semibold text-foreground mb-4 flex items-center gap-2">
               <ClipboardList className="w-5 h-5 text-primary" />
-              <span>Record Stock Transaction</span>
+              <span>{t('recordStockTransaction')}</span>
             </h3>
 
             {user?.role === 'STAFF' ? (
@@ -188,12 +190,12 @@ function Inventory() {
                 <div className="flex items-start gap-2.5">
                   <Info className="w-5 h-5 flex-shrink-0 mt-0.5 text-yellow-500" />
                   <div>
-                    <span className="font-bold block">Access Restricted</span>
+                    <span className="font-bold block">{t('accessRestricted')}</span>
                     <span className="text-xs text-muted-foreground mt-1 block leading-relaxed">
-                      Only administrators or managers can manually adjust inventory levels or transfer products between locations.
+                      {t('onlyAdminsManagersAdjust')}
                     </span>
                     <span className="text-xs text-muted-foreground mt-1.5 block leading-relaxed">
-                      Staff cashiers record stock deductions automatically by completing checkout sales in the Checkout module.
+                      {t('staffRecordDeductions')}
                     </span>
                   </div>
                 </div>
@@ -201,12 +203,12 @@ function Inventory() {
             ) : (
               <form onSubmit={handleCreateTransaction} className="space-y-4">
                 <div>
-                  <label className="label-text">Scan / Search Product</label>
+                  <label className="label-text">{t('scanSearchProduct')}</label>
                   <div className="relative mb-2">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground/60" />
                     <input
                       type="text"
-                      placeholder="Scan barcode or type name..."
+                      placeholder={t('scanSearchProduct')}
                       className="input-field-sm pl-9"
                       onChange={(e) => {
                         const val = e.target.value.trim().toLowerCase();
@@ -229,7 +231,7 @@ function Inventory() {
                     value={selectedProduct}
                     onChange={(e) => setSelectedProduct(e.target.value)}
                   >
-                    <option value="">Or choose item manually...</option>
+                    <option value="">{t('orChooseItemManually')}</option>
                     {allProducts.map((p) => (
                       <option key={p.id} value={p.id}>{p.name} ({p.sku})</option>
                     ))}
@@ -256,9 +258,9 @@ function Inventory() {
                   );
                 })()}
 
-                <div className="space-y-4">
+                 <div className="space-y-4">
                   <div>
-                    <label className="label-text">Action Type</label>
+                    <label className="label-text">{t('actionType')}</label>
                     <div className="grid grid-cols-2 gap-2">
                       <button
                         type="button"
@@ -266,7 +268,7 @@ function Inventory() {
                         className={`flex items-center gap-2 px-3 py-2 rounded-md border text-xs font-semibold transition cursor-pointer ${txType === 'IN' ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-500' : 'bg-background border-border text-muted-foreground hover:text-foreground hover:bg-muted/50'}`}
                       >
                         <ArrowUp className="w-4 h-4 text-emerald-500" />
-                        <span>Stock IN</span>
+                        <span>{t('stockIn')}</span>
                       </button>
                       <button
                         type="button"
@@ -274,7 +276,7 @@ function Inventory() {
                         className={`flex items-center gap-2 px-3 py-2 rounded-md border text-xs font-semibold transition cursor-pointer ${txType === 'OUT' ? 'bg-red-500/10 border-red-500/30 text-red-400' : 'bg-background border-border text-muted-foreground hover:text-foreground hover:bg-muted/50'}`}
                       >
                         <ArrowDown className="w-4 h-4 text-red-500" />
-                        <span>Stock OUT</span>
+                        <span>{t('stockOut')}</span>
                       </button>
                       <button
                         type="button"
@@ -282,7 +284,7 @@ function Inventory() {
                         className={`flex items-center gap-2 px-3 py-2 rounded-md border text-xs font-semibold transition cursor-pointer ${txType === 'ADJUSTMENT' ? 'bg-amber-500/10 border-amber-500/30 text-amber-400' : 'bg-background border-border text-muted-foreground hover:text-foreground hover:bg-muted/50'}`}
                       >
                         <Settings2 className="w-4 h-4 text-amber-500" />
-                        <span>Correct Count</span>
+                        <span>{t('correctCount')}</span>
                       </button>
                       <button
                         type="button"
@@ -290,19 +292,19 @@ function Inventory() {
                         className={`flex items-center gap-2 px-3 py-2 rounded-md border text-xs font-semibold transition cursor-pointer ${txType === 'TRANSFER' ? 'bg-blue-500/10 border-blue-500/30 text-blue-400' : 'bg-background border-border text-muted-foreground hover:text-foreground hover:bg-muted/50'}`}
                       >
                         <ArrowRightLeft className="w-4 h-4 text-blue-500" />
-                        <span>Transfer</span>
+                        <span>{t('transfer')}</span>
                       </button>
                     </div>
                   </div>
 
                   <div>
-                    <label className="label-text">Quantity</label>
+                    <label className="label-text">{t('quantity')}</label>
                     <div className="flex gap-2">
                       <input
                         type="number"
                         min="1"
                         required
-                        placeholder="Count"
+                        placeholder={t('quantity')}
                         className="input-field-sm font-bold text-center flex-1 text-sm"
                         value={txQty}
                         onChange={(e) => setTxQty(e.target.value)}
@@ -353,14 +355,14 @@ function Inventory() {
                         }}
                         className="py-1.5 rounded bg-card hover:bg-red-500/10 hover:border-red-500/20 hover:text-red-500 border border-border text-foreground text-[10px] font-bold active:scale-95 transition cursor-pointer"
                       >
-                        Del
+                        {t('delete')}
                       </button>
                       <button
                         type="button"
                         onClick={() => setTxQty('')}
                         className="py-1.5 rounded bg-card hover:bg-red-500/10 hover:border-red-500/20 hover:text-red-500 border border-border text-foreground text-[10px] font-bold active:scale-95 transition cursor-pointer"
                       >
-                        Clear
+                        {t('cancel')}
                       </button>
                       <button
                         type="button"
@@ -388,31 +390,31 @@ function Inventory() {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="label-text">Origin Location</label>
+                    <label className="label-text">{t('originLocation')}</label>
                     <select
                       className="input-field-sm"
                       value={selectedLocationForm}
                       onChange={(e) => setSelectedLocationForm(e.target.value)}
                     >
-                      <option value="Main">Main Shop</option>
-                      <option value="Warehouse">Warehouse A</option>
-                      <option value="Pharmacy">Pharmacy Shelf</option>
+                      <option value="Main">{t('mainShop')}</option>
+                      <option value="Warehouse">{t('warehouseA')}</option>
+                      <option value="Pharmacy">{t('pharmacyShelf')}</option>
                     </select>
                   </div>
 
                   {txType === 'TRANSFER' && (
                     <div>
-                      <label className="label-text text-primary">Target Location</label>
+                      <label className="label-text text-primary">{t('targetLocation')}</label>
                       <select
                         required
                         className="input-field-sm border-primary/50"
                         value={targetLocationForm}
                         onChange={(e) => setTargetLocationForm(e.target.value)}
                       >
-                        <option value="">Destination...</option>
-                        <option value="Main">Main Shop</option>
-                        <option value="Warehouse">Warehouse A</option>
-                        <option value="Pharmacy">Pharmacy Shelf</option>
+                        <option value="">{t('location')}...</option>
+                        <option value="Main">{t('mainShop')}</option>
+                        <option value="Warehouse">{t('warehouseA')}</option>
+                        <option value="Pharmacy">{t('pharmacyShelf')}</option>
                       </select>
                     </div>
                   )}
@@ -420,7 +422,7 @@ function Inventory() {
 
                 <div className="grid grid-cols-1 gap-4">
                   <div>
-                    <label className="label-text">Reference / PO #</label>
+                    <label className="label-text">{t('referencePo')}</label>
                     <input
                       type="text"
                       placeholder="e.g. PO-92832"
@@ -432,10 +434,10 @@ function Inventory() {
                 </div>
 
                 <div>
-                  <label className="label-text">Transaction Notes</label>
+                  <label className="label-text">{t('transactionNotes')}</label>
                   <textarea
                     rows={2}
-                    placeholder="Reason for adjustment/movement..."
+                    placeholder={t('transactionNotes')}
                     className="input-field-sm py-2"
                     value={txNote}
                     onChange={(e) => setTxNote(e.target.value)}
@@ -447,7 +449,7 @@ function Inventory() {
                   className="w-full py-2.5 rounded-md bg-primary hover:bg-primary/90 text-primary-foreground text-sm font-semibold transition flex items-center justify-center gap-1.5 cursor-pointer shadow-premium"
                 >
                   {txType === 'IN' ? <ArrowUp className="w-4 h-4" /> : txType === 'OUT' ? <ArrowDown className="w-4 h-4" /> : <ArrowRightLeft className="w-4 h-4" />}
-                  <span>Record Movement</span>
+                  <span>{t('recordMovement')}</span>
                 </button>
               </form>
             )}
@@ -463,7 +465,7 @@ function Inventory() {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground/60" />
               <input
                 type="text"
-                placeholder="Search stock by product name or SKU..."
+                placeholder={t('searchStockPlaceholder')}
                 className="input-field-sm pl-9"
                 value={search}
                 onChange={(e) => { setSearch(e.target.value); setPage(1); }}
@@ -475,10 +477,10 @@ function Inventory() {
               value={selectedLocation}
               onChange={(e) => { setSelectedLocation(e.target.value); setPage(1); }}
             >
-              <option value="">All Locations</option>
-              <option value="Main">Main Shop</option>
-              <option value="Warehouse">Warehouse A</option>
-              <option value="Pharmacy">Pharmacy Shelf</option>
+              <option value="">{t('allLocations')}</option>
+              <option value="Main">{t('mainShop')}</option>
+              <option value="Warehouse">{t('warehouseA')}</option>
+              <option value="Pharmacy">{t('pharmacyShelf')}</option>
             </select>
           </div>
 
@@ -489,30 +491,35 @@ function Inventory() {
             </div>
           ) : (
             <div className="p-6 rounded-xl border border-border bg-card/50 glass-panel shadow-premium">
-              <h3 className="text-base font-semibold text-foreground mb-4">Stock Inventory Levels</h3>
+              <h3 className="text-base font-semibold text-foreground mb-4">{t('inventory')}</h3>
               
               <div className="overflow-x-auto">
                 <table className="w-full text-sm text-left text-foreground">
                   <thead className="text-xs uppercase bg-muted/30 text-muted-foreground border-b border-border">
                     <tr>
-                      <th className="px-4 py-3">Product Name</th>
-                      <th className="px-4 py-3">SKU</th>
-                      <th className="px-4 py-3">Location</th>
-                      <th className="px-4 py-3 text-center">Available Stock</th>
-                      <th className="px-4 py-3 text-center">Threshold (Min)</th>
-                      <th className="px-4 py-3 text-center">Status</th>
+                      <th className="px-4 py-3">{t('productName')}</th>
+                      <th className="px-4 py-3">{t('sku')}</th>
+                      <th className="px-4 py-3">{t('location')}</th>
+                      <th className="px-4 py-3 text-center">{t('currentStock')}</th>
+                      <th className="px-4 py-3 text-center">{t('minThreshold')}</th>
+                      <th className="px-4 py-3 text-center">{t('status')}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border/60">
                     {inventoryItems.length === 0 ? (
                       <tr>
-                        <td colSpan={6} className="px-4 py-8 text-center text-muted-foreground">No stock levels found matching filters.</td>
+                        <td colSpan={6} className="px-4 py-8 text-center text-muted-foreground">{t('noLogsFound')}</td>
                       </tr>
                     ) : (
                       inventoryItems.map((item) => {
                         const isLow = item.quantity <= item.minStock;
                         const isOut = item.quantity === 0;
                         const flashClass = flashingRows[item.id] || '';
+
+                        // Localized location name display mapping
+                        const displayLoc = item.location === 'Main' ? t('mainShop') :
+                                           item.location === 'Warehouse' ? t('warehouseA') :
+                                           item.location === 'Pharmacy' ? t('pharmacyShelf') : item.location;
 
                         return (
                           <tr key={item.id} className={`hover:bg-muted/20 transition-all duration-300 ${flashClass}`}>
@@ -521,7 +528,7 @@ function Inventory() {
                               <span>{item.product.name}</span>
                             </td>
                             <td className="px-4 py-3 font-mono text-xs text-muted-foreground">{item.product.sku}</td>
-                            <td className="px-4 py-3 text-muted-foreground font-medium">{item.location}</td>
+                            <td className="px-4 py-3 text-muted-foreground font-medium">{displayLoc}</td>
                             <td className="px-4 py-3 text-center font-extrabold text-foreground">{item.quantity}</td>
                             <td className="px-4 py-3 text-center text-muted-foreground/70">{item.minStock}</td>
                             <td className="px-4 py-3 text-center">
@@ -531,7 +538,7 @@ function Inventory() {
                                 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'
                               }`}>
                                 <span>{isOut ? '🛑' : isLow ? '⚠️' : '✅'}</span>
-                                <span>{isOut ? 'Out of Stock' : isLow ? 'Low Stock' : 'In Stock'}</span>
+                                <span>{isOut ? t('outOfStock') : isLow ? t('lowStock') : t('inStock')}</span>
                               </span>
                             </td>
                           </tr>
@@ -545,21 +552,21 @@ function Inventory() {
               {/* Pagination Controls */}
               {pagination.pages > 1 && (
                 <div className="flex justify-between items-center mt-6 border-t border-border pt-4 text-sm">
-                  <span className="text-muted-foreground">Showing page {pagination.page} of {pagination.pages}</span>
+                  <span className="text-muted-foreground">{t('showingPage').replace('{page}', pagination.page).replace('{pages}', pagination.pages)}</span>
                   <div className="flex gap-2">
                     <button
                       disabled={pagination.page === 1}
                       onClick={() => setPage(pagination.page - 1)}
                       className="px-3 py-1 bg-secondary border border-border hover:bg-secondary/80 rounded text-xs font-semibold disabled:opacity-40 transition-colors"
                     >
-                      Prev
+                      {t('prev')}
                     </button>
                     <button
                       disabled={pagination.page === pagination.pages}
                       onClick={() => setPage(pagination.page + 1)}
                       className="px-3 py-1 bg-secondary border border-border hover:bg-secondary/80 rounded text-xs font-semibold disabled:opacity-40 transition-colors"
                     >
-                      Next
+                      {t('next')}
                     </button>
                   </div>
                 </div>
@@ -571,49 +578,54 @@ function Inventory() {
           <div className="p-6 rounded-xl border border-border bg-card/50 glass-panel shadow-premium">
             <h3 className="text-base font-semibold text-foreground mb-4 flex items-center gap-2">
               <Clock className="w-5 h-5 text-muted-foreground" />
-              <span>Full Transaction Audit Log</span>
+              <span>{t('auditHistoryLog')}</span>
             </h3>
             
             <div className="overflow-x-auto">
               <table className="w-full text-sm text-left text-foreground">
                 <thead className="text-xs uppercase bg-muted/30 text-muted-foreground border-b border-border">
                   <tr>
-                    <th className="px-4 py-2">Timestamp</th>
-                    <th className="px-4 py-2">Product</th>
-                    <th className="px-4 py-2">Location</th>
-                    <th className="px-4 py-2 text-center">Type</th>
-                    <th className="px-4 py-2 text-right">Qty</th>
-                    <th className="px-4 py-2">Operator</th>
-                    <th className="px-4 py-2">PO Ref</th>
+                    <th className="px-4 py-2">{t('timestamp')}</th>
+                    <th className="px-4 py-2">{t('productName')}</th>
+                    <th className="px-4 py-2">{t('location')}</th>
+                    <th className="px-4 py-2 text-center">{t('actionType')}</th>
+                    <th className="px-4 py-2 text-right">{t('quantity')}</th>
+                    <th className="px-4 py-2">{t('operator')}</th>
+                    <th className="px-4 py-2">{t('referencePo')}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border/60 text-xs">
                   {movements.length === 0 ? (
                     <tr>
-                      <td colSpan={7} className="px-4 py-6 text-center text-muted-foreground">No logs found.</td>
+                      <td colSpan={7} className="px-4 py-6 text-center text-muted-foreground">{t('noLogsFound')}</td>
                     </tr>
                   ) : (
-                    movements.map((mov) => (
-                      <tr key={mov.id} className="hover:bg-muted/20 transition-colors">
-                        <td className="px-4 py-2 text-muted-foreground/70">{new Date(mov.createdAt).toLocaleString()}</td>
-                        <td className="px-4 py-2 font-medium text-foreground">{mov.product.name}</td>
-                        <td className="px-4 py-2 text-muted-foreground">{mov.location}</td>
-                        <td className="px-4 py-2 text-center">
-                          <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${
-                            mov.type === 'IN' || mov.type === 'RETURN' ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' :
-                            mov.type === 'OUT' || mov.type === 'SALE' ? 'bg-destructive/10 text-destructive border-destructive/20' :
-                            'bg-primary/10 text-primary border border-primary/20'
-                          }`}>
-                            {mov.type}
-                          </span>
-                        </td>
-                        <td className={`px-4 py-2 text-right font-bold ${mov.quantity > 0 ? 'text-emerald-500' : 'text-destructive'}`}>
-                          {mov.quantity > 0 ? `+${mov.quantity}` : mov.quantity}
-                        </td>
-                        <td className="px-4 py-2 text-muted-foreground truncate max-w-[80px]">{mov.user.name}</td>
-                        <td className="px-4 py-2 text-muted-foreground/60 font-mono">{mov.reference || '-'}</td>
-                      </tr>
-                    ))
+                    movements.map((mov) => {
+                      const displayLoc = mov.location === 'Main' ? t('mainShop') :
+                                         mov.location === 'Warehouse' ? t('warehouseA') :
+                                         mov.location === 'Pharmacy' ? t('pharmacyShelf') : mov.location;
+                      return (
+                        <tr key={mov.id} className="hover:bg-muted/20 transition-colors">
+                          <td className="px-4 py-2 text-muted-foreground/70">{new Date(mov.createdAt).toLocaleString()}</td>
+                          <td className="px-4 py-2 font-medium text-foreground">{mov.product.name}</td>
+                          <td className="px-4 py-2 text-muted-foreground">{displayLoc}</td>
+                          <td className="px-4 py-2 text-center">
+                            <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${
+                              mov.type === 'IN' || mov.type === 'RETURN' ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' :
+                              mov.type === 'OUT' || mov.type === 'SALE' ? 'bg-destructive/10 text-destructive border-destructive/20' :
+                              'bg-primary/10 text-primary border border-primary/20'
+                            }`}>
+                              {mov.type}
+                            </span>
+                          </td>
+                          <td className={`px-4 py-2 text-right font-bold ${mov.quantity > 0 ? 'text-emerald-500' : 'text-destructive'}`}>
+                            {mov.quantity > 0 ? `+${mov.quantity}` : mov.quantity}
+                          </td>
+                          <td className="px-4 py-2 text-muted-foreground truncate max-w-[80px]">{mov.user.name}</td>
+                          <td className="px-4 py-2 text-muted-foreground/60 font-mono">{mov.reference || '-'}</td>
+                        </tr>
+                      );
+                    })
                   )}
                 </tbody>
               </table>
@@ -622,21 +634,21 @@ function Inventory() {
             {/* History Pagination */}
             {movPagination.pages > 1 && (
               <div className="flex justify-between items-center mt-4 border-t border-border pt-3 text-xs">
-                <span className="text-muted-foreground">Page {movPagination.page} of {movPagination.pages}</span>
+                <span className="text-muted-foreground">{t('pageOf').replace('{page}', movPagination.page).replace('{pages}', movPagination.pages)}</span>
                 <div className="flex gap-2">
                   <button
                     disabled={movPagination.page === 1}
                     onClick={() => setMovPage(movPagination.page - 1)}
-                    className="px-2 py-0.5 bg-secondary border border-border hover:bg-secondary/80 rounded disabled:opacity-40 transition-colors"
+                    className="px-2 py-0.5 bg-secondary border border-border hover:bg-secondary/80 rounded disabled:opacity-40 transition-colors text-xs font-semibold"
                   >
-                    Prev
+                    {t('prev')}
                   </button>
                   <button
                     disabled={movPagination.page === movPagination.pages}
                     onClick={() => setMovPage(movPagination.page + 1)}
-                    className="px-2 py-0.5 bg-secondary border border-border hover:bg-secondary/80 rounded disabled:opacity-40 transition-colors"
+                    className="px-2 py-0.5 bg-secondary border border-border hover:bg-secondary/80 rounded disabled:opacity-40 transition-colors text-xs font-semibold"
                   >
-                    Next
+                    {t('next')}
                   </button>
                 </div>
               </div>
