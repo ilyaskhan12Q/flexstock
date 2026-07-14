@@ -4,6 +4,7 @@ import { useAuthStore } from '../store/authStore';
 import { useNotificationStore } from '../store/notificationStore';
 import { useFeedbackStore } from '../store/feedbackStore';
 import { useSocket } from '../hooks/useSocket';
+import { useLanguageStore } from '../store/languageStore';
 import { 
   LayoutDashboard, 
   Package, 
@@ -30,6 +31,7 @@ function DashboardShell() {
   const { user, logout } = useAuthStore();
   const { notifications, addNotification, markAsRead, markAllAsRead } = useNotificationStore();
   const { open: feedbackOpen, isSuccess: feedbackIsSuccess, title: feedbackTitle, message: feedbackMessage, close: closeFeedback, voiceEnabled, toggleVoice } = useFeedbackStore();
+  const { language, setLanguage, t } = useLanguageStore();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [notifDropdownOpen, setNotifDropdownOpen] = useState(false);
   const [theme, setTheme] = useState(localStorage.getItem('theme') || 'dark');
@@ -82,15 +84,15 @@ function DashboardShell() {
 
   // Nav Items configuration based on User Role
   const navItems = [
-    { name: 'Dashboard', path: '/', icon: LayoutDashboard, roles: ['ADMIN', 'MANAGER', 'STAFF'] },
-    { name: 'Products', path: '/products', icon: Package, roles: ['ADMIN', 'MANAGER', 'STAFF'] },
-    { name: 'Inventory', path: '/inventory', icon: ClipboardList, roles: ['ADMIN', 'MANAGER', 'STAFF'] },
-    { name: 'Sales Register', path: '/sales', icon: ShoppingCart, roles: ['ADMIN', 'MANAGER', 'STAFF'] },
-    { name: 'Reports', path: '/reports', icon: TrendingUp, roles: ['ADMIN', 'MANAGER'] },
-    { name: 'Label Printing', path: '/labels', icon: Tag, roles: ['ADMIN', 'MANAGER'] },
-    { name: 'Categories / Schema', path: '/categories', icon: Settings, roles: ['ADMIN'] },
-    { name: 'Users', path: '/users', icon: UsersIcon, roles: ['ADMIN'] },
-    { name: 'Settings', path: '/settings', icon: Settings, roles: ['ADMIN'] },
+    { name: 'Dashboard', key: 'dashboard', path: '/', icon: LayoutDashboard, roles: ['ADMIN', 'MANAGER', 'STAFF'] },
+    { name: 'Products', key: 'products', path: '/products', icon: Package, roles: ['ADMIN', 'MANAGER', 'STAFF'] },
+    { name: 'Inventory', key: 'inventory', path: '/inventory', icon: ClipboardList, roles: ['ADMIN', 'MANAGER', 'STAFF'] },
+    { name: 'Sales Register', key: 'salesRegister', path: '/sales', icon: ShoppingCart, roles: ['ADMIN', 'MANAGER', 'STAFF'] },
+    { name: 'Reports', key: 'reports', path: '/reports', icon: TrendingUp, roles: ['ADMIN', 'MANAGER'] },
+    { name: 'Label Printing', key: 'labelPrinting', path: '/labels', icon: Tag, roles: ['ADMIN', 'MANAGER'] },
+    { name: 'Categories / Schema', key: 'categoriesSchema', path: '/categories', icon: Settings, roles: ['ADMIN'] },
+    { name: 'Users', key: 'users', path: '/users', icon: UsersIcon, roles: ['ADMIN'] },
+    { name: 'Settings', key: 'settings', path: '/settings', icon: Settings, roles: ['ADMIN'] },
   ];
 
   const filteredNavItems = navItems.filter(item => item.roles.includes(user?.role));
@@ -101,11 +103,19 @@ function DashboardShell() {
     navigate('/login');
   };
 
+  const sidebarPositionClass = language === 'ur' ? 'right-0 border-l' : 'left-0 border-r';
+  const sidebarTransformClass = sidebarOpen 
+    ? 'translate-x-0' 
+    : (language === 'ur' ? 'translate-x-full md:translate-x-0' : '-translate-x-full md:translate-x-0');
+  
+  const mainContentClass = language === 'ur' ? 'md:pr-60' : 'md:pl-60';
+  const notifDropdownAlignClass = language === 'ur' ? 'left-0' : 'right-0';
+
   return (
     <div className="min-h-screen flex bg-background text-foreground font-sans antialiased selection:bg-primary/20">
       
       {/* Sidebar for Desktop */}
-      <aside className={`fixed inset-y-0 left-0 z-40 w-60 bg-card border-r border-border transition-transform md:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+      <aside className={`fixed inset-y-0 ${sidebarPositionClass} z-40 w-60 bg-card border-border transition-transform ${sidebarTransformClass}`}>
         <div className="flex flex-col h-full">
           
           {/* Logo Brand Header */}
@@ -136,7 +146,7 @@ function DashboardShell() {
                   className={`flex items-center gap-2.5 px-3 py-1.5 rounded-md text-xs font-semibold transition ${active ? 'bg-secondary text-foreground font-semibold border-l-2 border-primary' : 'text-muted-foreground hover:bg-muted/40 hover:text-foreground'}`}
                 >
                   <Icon className="w-3.5 h-3.5" />
-                  <span>{item.name}</span>
+                  <span>{t(item.key)}</span>
                 </Link>
               );
             })}
@@ -162,7 +172,7 @@ function DashboardShell() {
               className="w-full flex items-center justify-center gap-1.5 py-1.5 rounded-md bg-secondary border border-border hover:bg-red-500/10 hover:border-red-500/20 hover:text-red-500 text-muted-foreground text-xs font-semibold transition cursor-pointer"
             >
               <LogOut className="w-3.5 h-3.5" />
-              <span>Sign Out</span>
+              <span>{t('signOut')}</span>
             </button>
           </div>
 
@@ -170,7 +180,7 @@ function DashboardShell() {
       </aside>
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col md:pl-60 min-w-0">
+      <div className={`flex-1 flex flex-col ${mainContentClass} min-w-0`}>
         
         {/* Top Navbar */}
         <header className="h-14 flex items-center justify-between px-5 border-b border-border bg-card/65 backdrop-blur-md sticky top-0 z-30">
@@ -179,7 +189,10 @@ function DashboardShell() {
               <Menu className="w-5 h-5" />
             </button>
             <h2 className="text-sm font-bold tracking-tight text-foreground">
-              {filteredNavItems.find((item) => item.path === location.pathname)?.name || 'App'}
+              {(() => {
+                const currentItem = filteredNavItems.find((item) => item.path === location.pathname);
+                return currentItem ? t(currentItem.key) : t('dashboard');
+              })()}
             </h2>
           </div>
 
@@ -187,8 +200,17 @@ function DashboardShell() {
             {/* Real-time Connection Indicator */}
             <span className={`text-[10px] flex items-center gap-1.5 px-2 py-0.5 rounded-full ${isConnected ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20' : 'bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 border border-yellow-500/20'}`}>
               <span className={`w-1.5 h-1.5 rounded-full ${isConnected ? 'bg-emerald-500 animate-pulse' : 'bg-yellow-500'}`} />
-              {isConnected ? 'Realtime Live' : 'Offline'}
+              {isConnected ? t('realtimeLive') : t('offline')}
             </span>
+
+            {/* Language Switcher Toggler */}
+            <button
+              onClick={() => setLanguage(language === 'en' ? 'ur' : 'en')}
+              title={language === 'en' ? "Switch to Urdu" : "English میں تبدیل کریں"}
+              className="px-2.5 py-1.5 rounded-md border border-border text-xs font-bold bg-secondary hover:text-foreground text-muted-foreground transition cursor-pointer flex items-center justify-center gap-1.5 shadow-sm"
+            >
+              <span>{language === 'en' ? 'اردو' : 'EN'}</span>
+            </button>
 
             {/* Dark/Light Mode Toggler */}
             <button
@@ -224,7 +246,8 @@ function DashboardShell() {
               {notifDropdownOpen && (
                 <>
                   <div className="fixed inset-0 z-40" onClick={() => setNotifDropdownOpen(false)} />
-                  <div className="absolute right-0 mt-1.5 w-72 rounded-md bg-card border border-border shadow-premium py-1.5 z-50 text-xs">
+                  <div className={`absolute ${notifDropdownAlignClass} mt-1.5 w-72 rounded-md bg-card border border-border shadow-premium py-1.5 z-50 text-xs`}>
+
                     <div className="flex items-center justify-between px-3.5 py-1.5 border-b border-border">
                       <span className="font-semibold text-foreground">Alerts Log</span>
                       {unreadNotifCount > 0 && (
