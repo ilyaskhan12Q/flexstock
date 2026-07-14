@@ -42,3 +42,8 @@ Thumbs.db
 # Uploads directory contents but keep the folder (if desired)
 server/uploads/*
 !server/uploads/.gitkeep
+
+# Graphify analysis outputs
+.graphify_*.json
+graphify-out/
+

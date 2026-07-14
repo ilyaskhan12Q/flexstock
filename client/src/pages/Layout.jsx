@@ -21,13 +21,15 @@ import {
   X,
   User as UserIcon,
   XCircle,
-  CheckCircle
+  CheckCircle,
+  Volume2,
+  VolumeX
 } from 'lucide-react';
 
 function DashboardShell() {
   const { user, logout } = useAuthStore();
   const { notifications, addNotification, markAsRead, markAllAsRead } = useNotificationStore();
-  const { open: feedbackOpen, isSuccess: feedbackIsSuccess, title: feedbackTitle, message: feedbackMessage, close: closeFeedback } = useFeedbackStore();
+  const { open: feedbackOpen, isSuccess: feedbackIsSuccess, title: feedbackTitle, message: feedbackMessage, close: closeFeedback, voiceEnabled, toggleVoice } = useFeedbackStore();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [notifDropdownOpen, setNotifDropdownOpen] = useState(false);
   const [theme, setTheme] = useState(localStorage.getItem('theme') || 'dark');
@@ -194,6 +196,15 @@ function DashboardShell() {
               className="p-1.5 rounded-md bg-secondary border border-border hover:brightness-105 text-muted-foreground hover:text-foreground transition cursor-pointer"
             >
               {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+            </button>
+
+            {/* Voice Assistant Toggler */}
+            <button
+              onClick={toggleVoice}
+              title={voiceEnabled ? "Mute Voice Assistant" : "Unmute Voice Assistant"}
+              className={`p-1.5 rounded-md border transition cursor-pointer ${voiceEnabled ? 'bg-primary/10 border-primary/30 text-primary hover:bg-primary/20' : 'bg-secondary border-border text-muted-foreground hover:text-foreground'}`}
+            >
+              {voiceEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
             </button>
 
             {/* Notifications Bell Dropdown */}
