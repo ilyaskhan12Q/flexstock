@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import API from '../api';
 import { useSocket } from '../hooks/useSocket';
 import { useFeedbackStore } from '../store/feedbackStore';
+import { useAuthStore } from '../store/authStore';
 import { 
   ClipboardList, 
   Search, 
@@ -21,6 +22,7 @@ function Inventory() {
   const [pagination, setPagination] = useState({ total: 0, page: 1, limit: 10, pages: 1 });
   const [movPagination, setMovPagination] = useState({ total: 0, page: 1, limit: 10, pages: 1 });
   const { showSuccess, showError } = useFeedbackStore();
+  const user = useAuthStore((state) => state.user);
   
   // Search & Filter State
   const [search, setSearch] = useState('');
@@ -181,180 +183,274 @@ function Inventory() {
               <span>Record Stock Transaction</span>
             </h3>
 
-            <form onSubmit={handleCreateTransaction} className="space-y-4">
-              <div>
-                <label className="label-text">Scan / Search Product</label>
-                <div className="relative mb-2">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground/60" />
-                  <input
-                    type="text"
-                    placeholder="Scan barcode or type name..."
-                    className="input-field-sm pl-9"
-                    onChange={(e) => {
-                      const val = e.target.value.trim().toLowerCase();
-                      if (!val) return;
-                      const matched = allProducts.find(p => 
-                        p.barcodeValue === val || 
-                        p.sku.toLowerCase() === val || 
-                        p.name.toLowerCase().includes(val)
-                      );
-                      if (matched) {
-                        setSelectedProduct(matched.id);
-                      }
-                    }}
-                  />
-                </div>
-                
-                <select
-                  required
-                  className="input-field-sm mb-2"
-                  value={selectedProduct}
-                  onChange={(e) => setSelectedProduct(e.target.value)}
-                >
-                  <option value="">Or choose item manually...</option>
-                  {allProducts.map((p) => (
-                    <option key={p.id} value={p.id}>{p.name} ({p.sku})</option>
-                  ))}
-                </select>
-              </div>
-
-              {selectedProduct && (() => {
-                const prod = allProducts.find(p => p.id === selectedProduct);
-                if (!prod) return null;
-                const catColor = prod.category?.color || '#3B82F6';
-                return (
-                  <div className="p-3 rounded-lg bg-card/60 border border-border flex items-center justify-between animate-fade-in">
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: catColor }} />
-                        <span className="font-bold text-foreground text-sm">{prod.name}</span>
-                      </div>
-                      <span className="text-xs font-mono text-muted-foreground block mt-0.5">{prod.sku}</span>
-                    </div>
-                    <span className="text-xs font-bold text-muted-foreground bg-muted/50 border border-border px-2 py-0.5 rounded">
-                      {prod.category?.name || 'No Category'}
+            {user?.role === 'STAFF' ? (
+              <div className="p-4 rounded-lg bg-yellow-500/5 border border-yellow-500/20 text-yellow-500/90 text-sm flex flex-col gap-3">
+                <div className="flex items-start gap-2.5">
+                  <Info className="w-5 h-5 flex-shrink-0 mt-0.5 text-yellow-500" />
+                  <div>
+                    <span className="font-bold block">Access Restricted</span>
+                    <span className="text-xs text-muted-foreground mt-1 block leading-relaxed">
+                      Only administrators or managers can manually adjust inventory levels or transfer products between locations.
+                    </span>
+                    <span className="text-xs text-muted-foreground mt-1.5 block leading-relaxed">
+                      Staff cashiers record stock deductions automatically by completing checkout sales in the Checkout module.
                     </span>
                   </div>
-                );
-              })()}
-
-              <div className="space-y-4">
-                <div>
-                  <label className="label-text">Action Type</label>
-                  <div className="grid grid-cols-2 gap-2">
-                    <button
-                      type="button"
-                      onClick={() => setTxType('IN')}
-                      className={`flex items-center gap-2 px-3 py-2 rounded-md border text-xs font-semibold transition cursor-pointer ${txType === 'IN' ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-500' : 'bg-background border-border text-muted-foreground hover:text-foreground hover:bg-muted/50'}`}
-                    >
-                      <ArrowUp className="w-4 h-4 text-emerald-500" />
-                      <span>Stock IN</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setTxType('OUT')}
-                      className={`flex items-center gap-2 px-3 py-2 rounded-md border text-xs font-semibold transition cursor-pointer ${txType === 'OUT' ? 'bg-red-500/10 border-red-500/30 text-red-400' : 'bg-background border-border text-muted-foreground hover:text-foreground hover:bg-muted/50'}`}
-                    >
-                      <ArrowDown className="w-4 h-4 text-red-500" />
-                      <span>Stock OUT</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setTxType('ADJUSTMENT')}
-                      className={`flex items-center gap-2 px-3 py-2 rounded-md border text-xs font-semibold transition cursor-pointer ${txType === 'ADJUSTMENT' ? 'bg-amber-500/10 border-amber-500/30 text-amber-500' : 'bg-background border-border text-muted-foreground hover:text-foreground hover:bg-muted/50'}`}
-                    >
-                      <Settings2 className="w-4 h-4 text-amber-500" />
-                      <span>Correct Count</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setTxType('TRANSFER')}
-                      className={`flex items-center gap-2 px-3 py-2 rounded-md border text-xs font-semibold transition cursor-pointer ${txType === 'TRANSFER' ? 'bg-primary/10 border-primary/30 text-primary' : 'bg-background border-border text-muted-foreground hover:text-foreground hover:bg-muted/50'}`}
-                    >
-                      <ArrowRightLeft className="w-4 h-4 text-primary" />
-                      <span>Transfer</span>
-                    </button>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="label-text">Quantity</label>
-                  <input
-                    type="number"
-                    min="1"
-                    required
-                    placeholder="Count"
-                    className="input-field-sm font-bold"
-                    value={txQty}
-                    onChange={(e) => setTxQty(e.target.value)}
-                  />
                 </div>
               </div>
-
-              <div className="grid grid-cols-2 gap-4">
+            ) : (
+              <form onSubmit={handleCreateTransaction} className="space-y-4">
                 <div>
-                  <label className="label-text">Origin Location</label>
+                  <label className="label-text">Scan / Search Product</label>
+                  <div className="relative mb-2">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground/60" />
+                    <input
+                      type="text"
+                      placeholder="Scan barcode or type name..."
+                      className="input-field-sm pl-9"
+                      onChange={(e) => {
+                        const val = e.target.value.trim().toLowerCase();
+                        if (!val) return;
+                        const matched = allProducts.find(p => 
+                          p.barcodeValue === val || 
+                          p.sku.toLowerCase() === val || 
+                          p.name.toLowerCase().includes(val)
+                        );
+                        if (matched) {
+                          setSelectedProduct(matched.id);
+                        }
+                      }}
+                    />
+                  </div>
+                  
                   <select
-                    className="input-field-sm"
-                    value={selectedLocationForm}
-                    onChange={(e) => setSelectedLocationForm(e.target.value)}
+                    required
+                    className="input-field-sm mb-2"
+                    value={selectedProduct}
+                    onChange={(e) => setSelectedProduct(e.target.value)}
                   >
-                    <option value="Main">Main Shop</option>
-                    <option value="Warehouse">Warehouse A</option>
-                    <option value="Pharmacy">Pharmacy Shelf</option>
+                    <option value="">Or choose item manually...</option>
+                    {allProducts.map((p) => (
+                      <option key={p.id} value={p.id}>{p.name} ({p.sku})</option>
+                    ))}
                   </select>
                 </div>
 
-                {txType === 'TRANSFER' && (
+                {selectedProduct && (() => {
+                  const prod = allProducts.find(p => p.id === selectedProduct);
+                  if (!prod) return null;
+                  const catColor = prod.category?.color || '#3B82F6';
+                  return (
+                    <div className="p-3 rounded-lg bg-card/60 border border-border flex items-center justify-between animate-fade-in">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: catColor }} />
+                          <span className="font-bold text-foreground text-sm">{prod.name}</span>
+                        </div>
+                        <span className="text-xs font-mono text-muted-foreground block mt-0.5">{prod.sku}</span>
+                      </div>
+                      <span className="text-xs font-bold text-muted-foreground bg-muted/50 border border-border px-2 py-0.5 rounded">
+                        {prod.category?.name || 'No Category'}
+                      </span>
+                    </div>
+                  );
+                })()}
+
+                <div className="space-y-4">
                   <div>
-                    <label className="label-text text-primary">Target Location</label>
+                    <label className="label-text">Action Type</label>
+                    <div className="grid grid-cols-2 gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setTxType('IN')}
+                        className={`flex items-center gap-2 px-3 py-2 rounded-md border text-xs font-semibold transition cursor-pointer ${txType === 'IN' ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-500' : 'bg-background border-border text-muted-foreground hover:text-foreground hover:bg-muted/50'}`}
+                      >
+                        <ArrowUp className="w-4 h-4 text-emerald-500" />
+                        <span>Stock IN</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setTxType('OUT')}
+                        className={`flex items-center gap-2 px-3 py-2 rounded-md border text-xs font-semibold transition cursor-pointer ${txType === 'OUT' ? 'bg-red-500/10 border-red-500/30 text-red-400' : 'bg-background border-border text-muted-foreground hover:text-foreground hover:bg-muted/50'}`}
+                      >
+                        <ArrowDown className="w-4 h-4 text-red-500" />
+                        <span>Stock OUT</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setTxType('ADJUSTMENT')}
+                        className={`flex items-center gap-2 px-3 py-2 rounded-md border text-xs font-semibold transition cursor-pointer ${txType === 'ADJUSTMENT' ? 'bg-amber-500/10 border-amber-500/30 text-amber-400' : 'bg-background border-border text-muted-foreground hover:text-foreground hover:bg-muted/50'}`}
+                      >
+                        <Settings2 className="w-4 h-4 text-amber-500" />
+                        <span>Correct Count</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setTxType('TRANSFER')}
+                        className={`flex items-center gap-2 px-3 py-2 rounded-md border text-xs font-semibold transition cursor-pointer ${txType === 'TRANSFER' ? 'bg-blue-500/10 border-blue-500/30 text-blue-400' : 'bg-background border-border text-muted-foreground hover:text-foreground hover:bg-muted/50'}`}
+                      >
+                        <ArrowRightLeft className="w-4 h-4 text-blue-500" />
+                        <span>Transfer</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="label-text">Quantity</label>
+                    <div className="flex gap-2">
+                      <input
+                        type="number"
+                        min="1"
+                        required
+                        placeholder="Count"
+                        className="input-field-sm font-bold text-center flex-1 text-sm"
+                        value={txQty}
+                        onChange={(e) => setTxQty(e.target.value)}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const current = parseInt(txQty) || 0;
+                          setTxQty(String(current + 1));
+                        }}
+                        className="px-2.5 py-1 rounded bg-secondary border border-border text-foreground font-bold hover:bg-muted/50 cursor-pointer text-xs"
+                      >
+                        +1
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const current = parseInt(txQty) || 0;
+                          setTxQty(String(current + 10));
+                        }}
+                        className="px-2.5 py-1 rounded bg-secondary border border-border text-foreground font-bold hover:bg-muted/50 cursor-pointer text-xs"
+                      >
+                        +10
+                      </button>
+                    </div>
+
+                    {/* ATM-style Numeric Keypad Grid for low-literacy accessibility */}
+                    <div className="mt-2.5 p-2 rounded-lg bg-background/50 border border-border/80 grid grid-cols-4 gap-1">
+                      {[1, 2, 3, 4, 5, 6, 7, 8, 9, 0].map((num) => (
+                        <button
+                          key={num}
+                          type="button"
+                          onClick={() => {
+                            setTxQty(prev => {
+                              if (prev === '0' || !prev) return String(num);
+                              return prev + num;
+                            });
+                          }}
+                          className="py-1.5 rounded bg-card hover:bg-muted border border-border text-foreground text-xs font-bold active:scale-95 transition cursor-pointer"
+                        >
+                          {num}
+                        </button>
+                      ))}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setTxQty(prev => prev.slice(0, -1));
+                        }}
+                        className="py-1.5 rounded bg-card hover:bg-red-500/10 hover:border-red-500/20 hover:text-red-500 border border-border text-foreground text-[10px] font-bold active:scale-95 transition cursor-pointer"
+                      >
+                        Del
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setTxQty('')}
+                        className="py-1.5 rounded bg-card hover:bg-red-500/10 hover:border-red-500/20 hover:text-red-500 border border-border text-foreground text-[10px] font-bold active:scale-95 transition cursor-pointer"
+                      >
+                        Clear
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const current = parseInt(txQty) || 0;
+                          setTxQty(String(current + 5));
+                        }}
+                        className="py-1.5 rounded bg-primary/10 border border-primary/20 text-primary hover:bg-primary/20 text-[10px] font-bold active:scale-95 transition cursor-pointer col-span-2"
+                      >
+                        +5 Quick
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const current = parseInt(txQty) || 0;
+                          setTxQty(String(current + 50));
+                        }}
+                        className="py-1.5 rounded bg-primary/10 border border-primary/20 text-primary hover:bg-primary/20 text-[10px] font-bold active:scale-95 transition cursor-pointer col-span-2"
+                      >
+                        +50 Quick
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="label-text">Origin Location</label>
                     <select
-                      required
-                      className="input-field-sm border-primary/50"
-                      value={targetLocationForm}
-                      onChange={(e) => setTargetLocationForm(e.target.value)}
+                      className="input-field-sm"
+                      value={selectedLocationForm}
+                      onChange={(e) => setSelectedLocationForm(e.target.value)}
                     >
-                      <option value="">Destination...</option>
                       <option value="Main">Main Shop</option>
                       <option value="Warehouse">Warehouse A</option>
                       <option value="Pharmacy">Pharmacy Shelf</option>
                     </select>
                   </div>
-                )}
-              </div>
 
-              <div className="grid grid-cols-1 gap-4">
+                  {txType === 'TRANSFER' && (
+                    <div>
+                      <label className="label-text text-primary">Target Location</label>
+                      <select
+                        required
+                        className="input-field-sm border-primary/50"
+                        value={targetLocationForm}
+                        onChange={(e) => setTargetLocationForm(e.target.value)}
+                      >
+                        <option value="">Destination...</option>
+                        <option value="Main">Main Shop</option>
+                        <option value="Warehouse">Warehouse A</option>
+                        <option value="Pharmacy">Pharmacy Shelf</option>
+                      </select>
+                    </div>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-1 gap-4">
+                  <div>
+                    <label className="label-text">Reference / PO #</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. PO-92832"
+                      className="input-field-sm"
+                      value={txRef}
+                      onChange={(e) => setTxRef(e.target.value)}
+                    />
+                  </div>
+                </div>
+
                 <div>
-                  <label className="label-text">Reference / PO #</label>
-                  <input
-                    type="text"
-                    placeholder="e.g. PO-92832"
-                    className="input-field-sm"
-                    value={txRef}
-                    onChange={(e) => setTxRef(e.target.value)}
+                  <label className="label-text">Transaction Notes</label>
+                  <textarea
+                    rows={2}
+                    placeholder="Reason for adjustment/movement..."
+                    className="input-field-sm py-2"
+                    value={txNote}
+                    onChange={(e) => setTxNote(e.target.value)}
                   />
                 </div>
-              </div>
 
-              <div>
-                <label className="label-text">Transaction Notes</label>
-                <textarea
-                  rows={2}
-                  placeholder="Reason for adjustment/movement..."
-                  className="input-field-sm py-2"
-                  value={txNote}
-                  onChange={(e) => setTxNote(e.target.value)}
-                />
-              </div>
-
-              <button
-                type="submit"
-                className="w-full py-2.5 rounded-md bg-primary hover:bg-primary/90 text-primary-foreground text-sm font-semibold transition flex items-center justify-center gap-1.5 cursor-pointer shadow-premium"
-              >
-                {txType === 'IN' ? <ArrowUp className="w-4 h-4" /> : txType === 'OUT' ? <ArrowDown className="w-4 h-4" /> : <ArrowRightLeft className="w-4 h-4" />}
-                <span>Record Movement</span>
-              </button>
-            </form>
+                <button
+                  type="submit"
+                  className="w-full py-2.5 rounded-md bg-primary hover:bg-primary/90 text-primary-foreground text-sm font-semibold transition flex items-center justify-center gap-1.5 cursor-pointer shadow-premium"
+                >
+                  {txType === 'IN' ? <ArrowUp className="w-4 h-4" /> : txType === 'OUT' ? <ArrowDown className="w-4 h-4" /> : <ArrowRightLeft className="w-4 h-4" />}
+                  <span>Record Movement</span>
+                </button>
+              </form>
+            )}
           </div>
         </div>
 

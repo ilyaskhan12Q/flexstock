@@ -141,6 +141,21 @@ describe('FlexStock API Integration Tests', () => {
   });
 
   describe('Inventory Adjustments & real-time movement triggers', () => {
+    it('should block non-admin/non-manager users from recording stock transactions', async () => {
+      const res = await request(app)
+        .post('/api/v1/inventory/movement')
+        .set('Authorization', `Bearer ${staffToken}`)
+        .send({
+          productId,
+          type: 'IN',
+          quantity: 50,
+          location: 'Main',
+          note: 'Malicious adjustment by staff'
+        });
+
+      expect(res.status).toBe(403);
+    });
+
     it('should record stock transaction and adjust quantities', async () => {
       // Record a Stock In movement
       const res = await request(app)
